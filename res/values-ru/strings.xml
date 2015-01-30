@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Converter</string>
+    <string name="action_settings">Настройки</string>
+    <string name="currency">Курс: </string>
+    <string name="serror">Не получено данных</string>
+    <string name="update">Дата: </string>
+    <string name="convert">Конвертировать</string>
+    <string name="swap">Своп</string>
+    <string name="loading">загрузка</string>
+    <string name="usevalues">Отконвертированное значение</string>
+    <string name="nodata">Нет данных. Проверьте подключение к интернету</string>
+    <string name="errorvalues">Проверьте правильность ввода</string>
+    <string name="nooper">Введите знак операции</string>
+    <string name="noconvertedvalue">Отсутствует отконвертированное значение</string>
+    <string name="lang">Язык</string>
+    <string name="save">Применить</string>
+    <string name="restart">Необходим перезапуск приложения</string>
+    
+    <array name="data">
+       <item>Конвертер</item>
+       <item>Калькулятор</item>
+    </array>
+    
+    <array name="MoneyName">
+       <item>USD</item>
+       <item>EUR</item>
+    </array>
+    
+    <color name="TabColor">#abc123</color>
+    <color name="CalcB">#8DD853</color>
+    <color name="RefreshB">#ffffff</color>
+    <string name="settings">Настройки</string>
+
+</resources>
