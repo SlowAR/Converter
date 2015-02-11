@@ -21,6 +21,7 @@ public class Calculator extends Fragment implements OnClickListener
 	EditText numWind, ettwo;
 	StringBuilder line = new StringBuilder();
 	String resultLine;
+	Main main;
 	
 	private boolean dotPressed;
 	private int posNum;
@@ -37,6 +38,11 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	ArrayList<Double> numbers = new ArrayList<Double>();
 	ArrayList<String> operations = new ArrayList<String>();
+	
+	public Calculator(Main main)
+	{
+		this.main = main;
+	}
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -85,6 +91,7 @@ public class Calculator extends Fragment implements OnClickListener
         pmbtn.setOnClickListener(this);
         perbtn.setOnClickListener(this);
         then.setOnClickListener(this);
+        
         return view;
     }
 

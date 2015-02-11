@@ -1,7 +1,6 @@
 package by.slowar.converter;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
@@ -12,14 +11,13 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 
 public class Main extends FragmentActivity 
 {
-	ViewPager pager;
 	PagerAdapter adapter;
-	private ViewPager mPager;
+	ViewPager mPager;
+	Main main;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) 
@@ -28,6 +26,8 @@ public class Main extends FragmentActivity
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.main);
 		
+		main = this;
+		
 		mPager = (ViewPager) findViewById(R.id.pager);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
         pagerTabStrip.setDrawFullUnderline(true);
@@ -35,6 +35,22 @@ public class Main extends FragmentActivity
         TitleAdapter titleAdapter = new TitleAdapter(getSupportFragmentManager());
         mPager.setAdapter(titleAdapter);
         mPager.setCurrentItem(0);
+        
+        mPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener()
+        {
+			@Override
+			public void onPageSelected(int arg0) 
+			{
+				InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		    	imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+			}
+			
+			@Override
+			public void onPageScrolled(int arg0, float arg1, int arg2) {}
+			
+			@Override
+			public void onPageScrollStateChanged(int arg0) {}
+		});
 	}
 	
 	public class TitleAdapter extends FragmentPagerAdapter 
@@ -45,8 +61,8 @@ public class Main extends FragmentActivity
 	    public TitleAdapter(FragmentManager fm) 
 	    {
 	        super(fm);
-	        frags[0] = new Converter((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE), getPreferences(MODE_PRIVATE));
-	        frags[1] = new Calculator();
+	        frags[0] = new Converter((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE), getPreferences(MODE_PRIVATE), main);
+	        frags[1] = new Calculator(main);
 	    }
 	 
 	    @Override
@@ -66,20 +82,5 @@ public class Main extends FragmentActivity
 	    {
 	        return frags.length;
 	    }
-	}
-	
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu)
-	{
-		menu.add(R.string.settings);
-		return super.onCreateOptionsMenu(menu);
-	}
-	
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item)
-	{
-		Intent intent = new Intent(this, Settings.class);
-		startActivity(intent);
-		return super.onOptionsItemSelected(item);
 	}
 }

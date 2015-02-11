@@ -17,6 +17,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 public class Currencies extends Activity
 {
@@ -160,7 +161,7 @@ public class Currencies extends Activity
             		jobj = jaray.getJSONObject(i);
             		currLine = jobj.getString("cc");
             		sb.append(currLine);
-            		sb.append("; ");
+            		sb.append(", ");
             		currLine = jobj.getString("name");
             		sb.append(currLine);
             		curr.add(sb.toString());
@@ -184,6 +185,13 @@ public class Currencies extends Activity
     		edit.putString("List", list);
     		edit.putString("ListSize", "" + curr.size());
 			edit.commit();
+			converter.listGeted = true;
+			
+	        if(prefs.contains("spin1") && prefs.contains("spin2"))
+	        {
+	        	converter.spin1.setSelection(Integer.parseInt(prefs.getString("spin1","")));
+	            converter.spin2.setSelection(Integer.parseInt(prefs.getString("spin2","")));
+	        }
     		
     		//new GetCurrency().execute();
         }

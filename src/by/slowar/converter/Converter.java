@@ -1,7 +1,10 @@
 package by.slowar.converter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -32,18 +35,21 @@ public class Converter extends Fragment implements OnClickListener
 	boolean listGeted = false;
 	double firstValue, secondValue;
 	double kurs = 0.82;
+	int k;
 	String first, second, temp;
 	ConnectivityManager cm;
 	CheckInternet chnet;
 	SharedPreferences prefs;
+	Main main;
 	
 	ArrayList<String> curr = new ArrayList<String>();
 	ArrayAdapter<String> adapter;
 	
-	public Converter(ConnectivityManager cm, SharedPreferences prefs)
+	public Converter(ConnectivityManager cm, SharedPreferences prefs, Main main)
 	{
 		this.cm = cm;
 		this.prefs = prefs;
+		this.main = main;
 	}
 
 	@Override
@@ -73,21 +79,14 @@ public class Converter extends Fragment implements OnClickListener
         if(chnet.connet(cm))
         {
         	if(!listGeted)
-        	{
         		currencies.getList();
-        		listGeted = true;
-        	}
         }
 		else
 		{
         	if(!listGeted)
-        	{
         		gettingList();
-        	}
         	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-        	{
         		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-        	}
 		}
         
         spin1.setOnItemSelectedListener(new OnItemSelectedListener()
@@ -114,6 +113,12 @@ public class Converter extends Fragment implements OnClickListener
 		        		jsonRes.setText("");
 		        		tvupd.setText(R.string.nodata);
 		        	}
+		        }
+		        if(listGeted)
+		        {
+		        	Editor edit = prefs.edit();
+					edit.putString("spin1", ""+spin1.getSelectedItemPosition());
+					edit.commit();
 		        }
 			}
 
@@ -147,6 +152,12 @@ public class Converter extends Fragment implements OnClickListener
 		        		tvupd.setText(R.string.nodata);
 		        	}
 		        }
+		        if(listGeted)
+		        {
+		        	Editor edit = prefs.edit();
+					edit.putString("spin2", ""+spin2.getSelectedItemPosition());
+					edit.commit();
+		        }
 			}
 
 			@Override
@@ -167,7 +178,7 @@ public class Converter extends Fragment implements OnClickListener
 			try
 			{
 				firstValue = Double.parseDouble(etone.getText().toString());
-				secondValue = firstValue * kurs;
+				secondValue = new BigDecimal(firstValue * kurs).setScale(3, RoundingMode.UP).doubleValue();
 				ettwo.setText("" + secondValue);
 			}
 			catch(Exception e)
@@ -242,5 +253,11 @@ public class Converter extends Fragment implements OnClickListener
 		spin1.setAdapter(adapter);
 		spin2.setAdapter(adapter);
 		listGeted = true;
+		
+        if(prefs.contains("spin1") && prefs.contains("spin2"))
+        {
+        	spin1.setSelection(Integer.parseInt(prefs.getString("spin1","")));
+            spin2.setSelection(Integer.parseInt(prefs.getString("spin2","")));
+        }
 	}
 }
