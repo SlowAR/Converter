@@ -1280,13 +1280,16 @@ containing a value of this type.
         public static final int errorvalues=0x7f0a0017;
         public static final int lang=0x7f0a001a;
         public static final int loading=0x7f0a0014;
+        public static final int loadingMsg=0x7f0a001e;
+        public static final int loadingTitle=0x7f0a001d;
+        public static final int noInternet=0x7f0a001f;
         public static final int noconvertedvalue=0x7f0a0019;
         public static final int nodata=0x7f0a0016;
         public static final int nooper=0x7f0a0018;
         public static final int restart=0x7f0a001c;
         public static final int save=0x7f0a001b;
         public static final int serror=0x7f0a0010;
-        public static final int settings=0x7f0a001d;
+        public static final int settings=0x7f0a0020;
         public static final int swap=0x7f0a0013;
         public static final int update=0x7f0a0011;
         public static final int usevalues=0x7f0a0015;

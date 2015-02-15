@@ -363,13 +363,13 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void thenCalc()
 	{
-		if(dotPressed)
+		if(dotPressed)										//{ проверка на дробное число
 			numbers.add(temp/zpz);
 		else
-			numbers.add(temp);
+			numbers.add(temp);								//проверка на дробное число }
 		temp = 0;
 		
-		while(posOp <= operations.size()-1)
+		while(posOp <= operations.size()-1)					//{ обработка приоритетных операций (* / %)
 		{
 			if(operations.get(posOp) == "*")
 			{
@@ -409,12 +409,12 @@ public class Calculator extends Fragment implements OnClickListener
 				posNum++;
 				posOp++;
 			}
-		}
+		}													//обработка приоритетных операций (* / %) }									
 		
 		posNum = 0;
 		posOp = 0;
 		
-		while(posOp <= operations.size()-1)
+		while(posOp <= operations.size()-1)					//{ обработка менее приоритетных операций (+ -)
 		{
 			if(operations.get(posOp) == "+" && posOp == 0)
 			{
@@ -445,6 +445,11 @@ public class Calculator extends Fragment implements OnClickListener
 				res = res - numbers.get(posNum);
 				posOp++;
 			}
+		}													//обработка менее приоритетных операций (+ -) }
+		
+		if(operations.isEmpty() && !numbers.isEmpty())
+		{
+			res = numbers.get(posNum);
 		}
 		
 		numWind.setText("");
@@ -456,6 +461,24 @@ public class Calculator extends Fragment implements OnClickListener
 		{
 			inf = true;
 		}
+		
+		int zeroNum = 0;
+		int zeroPos = 0;
+		String strRes = "" + res;
+		char[] chres = strRes.toCharArray();
+		for(int i = 0; i < strRes.length(); i++)
+		{
+			if(chres[i] == '0')
+			{
+				if(zeroNum == 0)
+					zeroPos = i;
+				if(zeroNum >= 4)
+					break;
+				zeroNum++;
+			}
+		}
+		String resLine = strRes.substring(0, zeroPos);
+		res = Double.parseDouble(resLine);
 		
 		if(res - (int)res == 0)
 			numWind.append("" + (int)res);

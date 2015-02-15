@@ -3,12 +3,12 @@ package by.slowar.converter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -31,6 +31,7 @@ public class Converter extends Fragment implements OnClickListener
 	EditText etone, ettwo;
 	Spinner spin1, spin2;
 	Currencies currencies;
+	ProgressDialog loadingData;
 	
 	boolean listGeted = false;
 	double firstValue, secondValue;
@@ -54,8 +55,9 @@ public class Converter extends Fragment implements OnClickListener
 
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
-    {	    
+	{
     	chnet = new CheckInternet(this);
+    	loadingData = new ProgressDialog(getActivity());
     	
         View view = inflater.inflate(R.layout.converter, container, false);
         jsonRes = (TextView) view.findViewById(R.id.jsonRes);
@@ -84,18 +86,23 @@ public class Converter extends Fragment implements OnClickListener
 		else
 		{
         	if(!listGeted)
-        		gettingList();
+        		loadingDataOffline();
         	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
         		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
 		}
         
         spin1.setOnItemSelectedListener(new OnItemSelectedListener()
         {
-
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View arg1, int arg2, long arg3)
 			{
-				((TextView) parent.getChildAt(0)).setText(spin1.getSelectedItem().toString().substring(0, 3));
+				try
+				{
+					((TextView) parent.getChildAt(0)).setText(spin1.getSelectedItem().toString().substring(0, 3));
+				}
+				catch(NullPointerException e)
+				{}
+				
 		        if(chnet.connet(cm))
 		        {
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
@@ -133,7 +140,13 @@ public class Converter extends Fragment implements OnClickListener
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View arg1, int arg2, long arg3)
 			{
-				((TextView) parent.getChildAt(0)).setText(spin2.getSelectedItem().toString().substring(0, 3));
+				try
+				{
+					((TextView) parent.getChildAt(0)).setText(spin2.getSelectedItem().toString().substring(0, 3));
+				}
+				catch(NullPointerException e)
+				{}
+				
 		        if(chnet.connet(cm))
 		        {
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
@@ -165,8 +178,14 @@ public class Converter extends Fragment implements OnClickListener
 			{
 			}
 		});
-        
+
         return view;
+    }
+	
+    public void setupDialog()
+    {
+    	loadingData.setTitle(R.string.loadingTitle);
+    	loadingData.show();
     }
 
 	@Override
@@ -212,7 +231,6 @@ public class Converter extends Fragment implements OnClickListener
 		        	if(!listGeted)
 		        	{
 		        		currencies.getList();
-		        		listGeted = true;
 		        	}
 		        	else
 		        	{
@@ -221,10 +239,10 @@ public class Converter extends Fragment implements OnClickListener
 		        }
 				else
 				{
-					Log.d("Internet Error", "Net interneta");
+					Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
 		        	if(!listGeted)
 		        	{
-		        		gettingList();
+		        		loadingDataOffline();
 		        	}
 		        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
 		        	{
@@ -239,16 +257,31 @@ public class Converter extends Fragment implements OnClickListener
 		}
 	}
 	
-	public void gettingList()
+	private void loadingDataOffline()
 	{
 		int listSize = Integer.parseInt(prefs.getString("ListSize", ""));
-		int pas = 0;
+		int prev = 0;
+		int next = 0;
 		String list = prefs.getString("List", "");
+		char[] listch = list.toCharArray();
 		for(int i = 0; i < listSize-1; i++)
 		{
-			curr.add(list.substring(pas, pas+3));
-			pas = pas + 3;
+			while(true)
+			{
+				if(listch[next] == '$')
+    			{
+					curr.add(list.substring(prev, next));
+					next = next + 1;
+					prev = next;
+					break;
+    			}
+				else
+				{
+					next++;
+				}
+			}
 		}
+		
 		adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_list_item_1, curr);
 		spin1.setAdapter(adapter);
 		spin2.setAdapter(adapter);

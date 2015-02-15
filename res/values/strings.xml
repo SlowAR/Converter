@@ -17,6 +17,9 @@
     <string name="lang">Language</string>
     <string name="save">Save</string>
     <string name="restart">Restart application for changing language</string>
+    <string name="loadingTitle">Loading</string>
+    <string name="loadingMsg">Loading data</string>
+    <string name="noInternet">Check Your Internet connection</string>
     
     <array name="data">
        <item>Converter</item>

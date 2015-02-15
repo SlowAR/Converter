@@ -16,8 +16,8 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 public class Currencies extends Activity
 {
@@ -36,11 +36,6 @@ public class Currencies extends Activity
 		this.converter = converter;
 		this.prefs = prefs;
 		chnet = new CheckInternet(converter);
-	}
-	
-	public void getCurrency()
-	{
-		new GetCurrency().execute();
 	}
 	
 	public void getCurrency(String value1, String value2)
@@ -71,39 +66,51 @@ public class Currencies extends Activity
         @Override
         protected Void doInBackground(Void... params)
         {
-			try {
+			try
+			{
 				Document doc = Jsoup.connect(link).get();
 				result = doc.select("span[class=bld]").text();
-			} catch (IOException e) {
-				converter.etone.setText("Error!");
+			}
+			catch (IOException e)
+			{
 				e.printStackTrace();
 			}
+			
 			return null;
         }
  
         @Override
         protected void onPostExecute(Void res) 
         {
-        	String currency = "";
-        	for(int i = 0; i < result.length(); i++)
+        	try
         	{
-        		if(Character.isDigit(result.charAt(i)) || result.charAt(i) == '.')
+        		String currency = "";
+            	for(int i = 0; i < result.length(); i++)
             	{
-            		currency = currency + result.charAt(i);
+            		if(Character.isDigit(result.charAt(i)) || result.charAt(i) == '.')
+                	{
+                		currency = currency + result.charAt(i);
+                	}
             	}
+            	
+            	if(currency == "")
+            	{
+            		converter.kurs = 1;
+            		converter.jsonRes.setText("" + converter.kurs);
+            		chnet.dateUp(true, prefs, converter.spin1.getSelectedItem().toString().substring(0, 3) + converter.spin2.getSelectedItem().toString().substring(0, 3));
+            	}
+            	else
+            	{
+            		converter.kurs = Double.parseDouble(currency);
+            		converter.jsonRes.setText(currency);
+            		chnet.dateUp(true, prefs, converter.spin1.getSelectedItem().toString().substring(0, 3) + converter.spin2.getSelectedItem().toString().substring(0, 3));
+            	}
+            	
+            	converter.loadingData.dismiss();
         	}
-        	
-        	if(currency == "")
+        	catch(NullPointerException e)
         	{
-        		converter.kurs = 1;
-        		converter.jsonRes.setText("" + converter.kurs);
-        		chnet.dateUp(true, prefs, converter.spin1.getSelectedItem().toString().substring(0, 3) + converter.spin2.getSelectedItem().toString().substring(0, 3));
-        	}
-        	else
-        	{
-        		converter.kurs = Double.parseDouble(currency);
-        		converter.jsonRes.setText(currency);
-        		chnet.dateUp(true, prefs, converter.spin1.getSelectedItem().toString().substring(0, 3) + converter.spin2.getSelectedItem().toString().substring(0, 3));
+        		new GetCurrency().execute();
         	}
         }
     }
@@ -113,6 +120,13 @@ public class Currencies extends Activity
         HttpURLConnection openUrl = null;
         BufferedReader reader = null;
         String resultJson = " ";
+        
+        @Override
+        protected void onPreExecute()
+        {
+        	super.onPreExecute();
+        	converter.setupDialog();
+        }
         
         @Override
         protected String doInBackground(Void... params)
@@ -142,6 +156,7 @@ public class Currencies extends Activity
             {
                 e.printStackTrace();
             }
+        	
     		return resultJson;
         }
  
@@ -149,6 +164,7 @@ public class Currencies extends Activity
         protected void onPostExecute(String strJson) 
         {
             super.onPostExecute(strJson);
+            
             JSONObject jobj = null;
             String currLine = "";
  
@@ -180,8 +196,11 @@ public class Currencies extends Activity
     		Editor edit = prefs.edit();
     		for(int i = 0; i < curr.size()-1; i++)
     		{
-    			list = list + curr.get(i).substring(0, 3);
+    			//list = list + curr.get(i).substring(0, 3);
+    			list = list + curr.get(i);
+    			list = list + '$';
     		}
+    		Log.d("Crashing", list);
     		edit.putString("List", list);
     		edit.putString("ListSize", "" + curr.size());
 			edit.commit();
@@ -192,8 +211,8 @@ public class Currencies extends Activity
 	        	converter.spin1.setSelection(Integer.parseInt(prefs.getString("spin1","")));
 	            converter.spin2.setSelection(Integer.parseInt(prefs.getString("spin2","")));
 	        }
-    		
-    		//new GetCurrency().execute();
+	        
+	        new GetCurrency().execute();
         }
     }
 }
