@@ -20,6 +20,7 @@
     <string name="loadingTitle">Loading</string>
     <string name="loadingMsg">Loading data</string>
     <string name="noInternet">Check Your Internet connection</string>
+    <string name="chooseOp">Choose operation</string>
     
     <array name="data">
        <item>Converter</item>

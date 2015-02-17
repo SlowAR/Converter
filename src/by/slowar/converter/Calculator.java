@@ -3,7 +3,6 @@ package by.slowar.converter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -30,7 +29,7 @@ public class Calculator extends Fragment implements OnClickListener
 	private double temp;
 	private double res;	
 	private boolean resEmpty = true;
-	private double zpz = 1;
+	private int zpz = 1;
 	private String getValues;
 	private int numZpz = 1;
 	private boolean newNum = true;
@@ -181,21 +180,28 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void number(int number)
 	{
-		if(number == 0)
+		if(!resEmpty)
 		{
-			numWind.append("0");
-			temp = temp * 10;
+			Toast.makeText(getActivity(), R.string.chooseOp, Toast.LENGTH_LONG).show();
 		}
 		else
 		{
-			numWind.append("" + number);
-			if(temp == 0)
-				temp = number;
+			if(number == 0)
+			{
+				numWind.append("0");
+				temp = temp * 10;
+			}
 			else
-				temp = temp * 10 + number;
+			{
+				numWind.append("" + number);
+				if(temp == 0)
+					temp = number;
+				else
+					temp = temp * 10 + number;
+			}
+			if(dotPressed)
+				zpz = zpz * 10;
 		}
-		if(dotPressed)
-			zpz = zpz * 10;
 	}
 	
 	private void operation(String operation)
@@ -205,7 +211,9 @@ public class Calculator extends Fragment implements OnClickListener
 			if(dotPressed)
 			{
 				if(temp != 0)
+				{
 					numbers.add(temp/zpz);
+				}
 				if(numbers.size() > operations.size())
 				{
 					operations.add(operation);
@@ -364,7 +372,9 @@ public class Calculator extends Fragment implements OnClickListener
 	private void thenCalc()
 	{
 		if(dotPressed)										//{ проверка на дробное число
+		{
 			numbers.add(temp/zpz);
+		}
 		else
 			numbers.add(temp);								//проверка на дробное число }
 		temp = 0;
@@ -462,29 +472,32 @@ public class Calculator extends Fragment implements OnClickListener
 			inf = true;
 		}
 		
-		int zeroNum = 0;
-		int zeroPos = 0;
-		String strRes = "" + res;
+		String strRes = ""+res;
 		char[] chres = strRes.toCharArray();
-		for(int i = 0; i < strRes.length(); i++)
+		int n = 0;
+		int reslen = strRes.length();
+		boolean dot = false;
+		for(int i = 0; i < reslen; i++)
 		{
-			if(chres[i] == '0')
+			if(!dot && chres[i] == '.')
 			{
-				if(zeroNum == 0)
-					zeroPos = i;
-				if(zeroNum >= 4)
-					break;
-				zeroNum++;
+				dot = true;
+			}
+			else if(dot)
+			{
+				n++;
 			}
 		}
-		String resLine = strRes.substring(0, zeroPos);
-		res = Double.parseDouble(resLine);
+		if(n == 10)
+		{
+			res = new BigDecimal(res).setScale(9, RoundingMode.DOWN).doubleValue();
+		}
 		
 		if(res - (int)res == 0)
 			numWind.append("" + (int)res);
 		else
 			numWind.append("" + res);
-		
+
 		posOp = 0;
 		posNum = 0;
 		numbers.clear();

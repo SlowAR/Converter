@@ -20,6 +20,7 @@
     <string name="loadingTitle">Загрузка</string>
     <string name="loadingMsg">Загрузка данных</string>
     <string name="noInternet">Проверьте подключение к Интернету</string>
+    <string name="chooseOp">Выберите операцию</string>
     
     <array name="data">
        <item>Конвертер</item>

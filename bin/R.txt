@@ -380,6 +380,7 @@ int string abc_shareactionprovider_share_with 0x7f0a000c
 int string abc_shareactionprovider_share_with_application 0x7f0a000b
 int string action_settings 0x7f0a000e
 int string app_name 0x7f0a000d
+int string chooseOp 0x7f0a0020
 int string convert 0x7f0a0012
 int string currency 0x7f0a000f
 int string errorvalues 0x7f0a0017
@@ -394,7 +395,7 @@ int string nooper 0x7f0a0018
 int string restart 0x7f0a001c
 int string save 0x7f0a001b
 int string serror 0x7f0a0010
-int string settings 0x7f0a0020
+int string settings 0x7f0a0021
 int string swap 0x7f0a0013
 int string update 0x7f0a0011
 int string usevalues 0x7f0a0015
