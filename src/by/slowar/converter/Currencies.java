@@ -16,7 +16,6 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
-import android.util.Log;
 import android.widget.ArrayAdapter;
 
 public class Currencies extends Activity
@@ -196,11 +195,9 @@ public class Currencies extends Activity
     		Editor edit = prefs.edit();
     		for(int i = 0; i < curr.size()-1; i++)
     		{
-    			//list = list + curr.get(i).substring(0, 3);
     			list = list + curr.get(i);
     			list = list + '$';
     		}
-    		Log.d("Crashing", list);
     		edit.putString("List", list);
     		edit.putString("ListSize", "" + curr.size());
 			edit.commit();

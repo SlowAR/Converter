@@ -24,10 +24,11 @@
                 android:ems="10"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:gravity="right"
+                android:gravity="right|center_vertical"
                 android:inputType="text"
                 android:singleLine="true"
-                android:textSize="45sp" >
+                android:text="123"
+                android:textSize="23sp" >
 
                 <requestFocus />
             </EditText>

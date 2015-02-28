@@ -2,7 +2,10 @@ package by.slowar.converter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -23,6 +26,7 @@ public class Calculator extends Fragment implements OnClickListener
 	Main main;
 	
 	private boolean dotPressed;
+	private boolean dotPress;
 	private int posNum;
 	private int posOp;
 	private int lineLength;
@@ -134,6 +138,7 @@ public class Calculator extends Fragment implements OnClickListener
 			{
 				numWind.append(".");
 				dotPressed = true;
+				dotPress = true;
 			}
 			break;
 		case R.id.div:
@@ -174,6 +179,7 @@ public class Calculator extends Fragment implements OnClickListener
 		temp = 0;
 		resEmpty = true;
 		dotPressed = false;
+		dotPress = false;
 		newNum = true;
 		inf = false;
 	}
@@ -371,6 +377,8 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void thenCalc()
 	{
+		NumberFormat formatter = new DecimalFormat("0.000000000E00");
+		
 		if(dotPressed)										//{ проверка на дробное число
 		{
 			numbers.add(temp/zpz);
@@ -496,7 +504,12 @@ public class Calculator extends Fragment implements OnClickListener
 		if(res - (int)res == 0)
 			numWind.append("" + (int)res);
 		else
-			numWind.append("" + res);
+		{
+			if(!dotPress)
+				numWind.append(formatter.format(res));
+			else
+				numWind.append("" + res);
+		}
 
 		posOp = 0;
 		posNum = 0;
