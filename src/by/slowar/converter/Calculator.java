@@ -1,13 +1,10 @@
 package by.slowar.converter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -392,9 +389,6 @@ public class Calculator extends Fragment implements OnClickListener
 							}
 							catch(Exception e)
 							{
-								Log.d("Error e = ", "" + e);
-								Log.d("FloatPartLen = ", "" + floatPartLen);
-								Log.d("Error e = ", "" + e);
 								pmbtn.setEnabled(false);
 								numWind.setText(numWind.getText().toString() + lastCh);
 							}
@@ -534,14 +528,11 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		else if (lastPoint != -1 && notdiv)
 		{
-			Toast.makeText(getActivity(), "nodivision", Toast.LENGTH_LONG).show();
 			dot = false;
 			if(reslen - (lastPoint+1) > 10 && dotPress)
 			{
-				Toast.makeText(getActivity(), "1) " + strRes, Toast.LENGTH_LONG).show();
 				strRes = strRes.substring(0, lastPoint + 1 + 10);
 				res = Double.parseDouble(strRes);
-				Toast.makeText(getActivity(), "2) " + strRes, Toast.LENGTH_LONG).show();
 			}
 		}
 		
@@ -552,7 +543,6 @@ public class Calculator extends Fragment implements OnClickListener
 			if(!dotPress && dot && !division && !percent)
 			{
 				numWind.append(formatter.format(res));
-				Toast.makeText(getActivity(), "dotPress = " + dotPress + " dot = " + dot + " division = " + division + " percent = " + percent, Toast.LENGTH_LONG).show();
 			}
 			else
 			{
