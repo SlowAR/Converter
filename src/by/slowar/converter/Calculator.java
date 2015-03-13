@@ -1,13 +1,11 @@
 package by.slowar.converter;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,10 +31,8 @@ public class Calculator extends Fragment implements OnClickListener
 	private double temp;
 	private double res;	
 	private boolean resEmpty = true;
-	private int zpz = 1;
+	private long zpz = 1;
 	private String getValues;
-	private int numZpz = 1;
-	private boolean newNum = true;
 	private boolean inf = false;
 	
 	ArrayList<Double> numbers = new ArrayList<Double>();
@@ -180,8 +176,8 @@ public class Calculator extends Fragment implements OnClickListener
 		resEmpty = true;
 		dotPressed = false;
 		dotPress = false;
-		newNum = true;
 		inf = false;
+		pmbtn.setEnabled(true);
 	}
 	
 	private void number(int number)
@@ -264,6 +260,11 @@ public class Calculator extends Fragment implements OnClickListener
 				numWind.append(getValues);
 				numbers.add(Double.parseDouble(getValues));
 				resEmpty = false;
+				String sres = numWind.getText().toString();
+				if(sres.lastIndexOf('E') != -1)
+				{
+					pmbtn.setEnabled(false);
+				}
 			}
 		}
 		catch(Exception e)
@@ -294,8 +295,12 @@ public class Calculator extends Fragment implements OnClickListener
 		boolean windClear = false;
 		if(!inf)
 		{
+			char lastCh = 0;
 			if(!numWind.getText().toString().equals(""))
+			{
+				lastCh = numWind.getText().toString().charAt(numWind.getText().toString().length()-1);
 				delLastSign();
+			}
 			if(temp != 0)
 			{
 				if(dotPressed && zpz != 1)
@@ -310,7 +315,7 @@ public class Calculator extends Fragment implements OnClickListener
 			}
 			else if(temp == 0)
 			{
-				if(!numbers.isEmpty() || !operations.isEmpty())
+				if(!numbers.isEmpty())
 				{
 					if(numbers.size() > operations.size())
 					{
@@ -318,7 +323,7 @@ public class Calculator extends Fragment implements OnClickListener
 						{
 							double tempNum = numbers.get(numbers.size()-1)/10;
 							numbers.set(numbers.size()-1, Math.floor(tempNum));
-							if(numbers.get(numbers.size()-1) == 0)
+							if(numbers.get(numbers.size()-1) == 0 && operations.size() != 0)
 							{
 								numbers.remove(numbers.size()-1);
 								windClear = delLastSign();
@@ -326,36 +331,68 @@ public class Calculator extends Fragment implements OnClickListener
 									operations.remove(operations.size()-1);
 								resEmpty = false;
 							}
+							else if(numbers.get(numbers.size()-1) == 0 && operations.size() == 0)
+							{
+								ac();
+							}
 						}
 						else
 						{
-							double getZpz = 0;
-							if(newNum)
-								newNum = false;
-							else
-								getZpz = new BigDecimal(numbers.get(numbers.size()-1)).setScale(numZpz, RoundingMode.UP).doubleValue();
-							
-							numZpz = 1;
-							String numLine = String.valueOf(numbers.get(numbers.size()-1));
-							int index = numLine.lastIndexOf(".");
-							long floating = Long.parseLong(numLine.substring(index+1, numLine.length()));
-							
-							while(true)
+							String floatPart = "";
+							int floatPartLen = 0;
+							char chflHalf[];
+							try
 							{
-								floating = floating/10;
-								if(floating != 0)
-									numZpz++;
-								else if(floating == 0)
-									break;
+								if(numWind.getText().toString().lastIndexOf('.') != -1)
+								{
+									floatPart = numWind.getText().toString().substring(numWind.getText().toString().lastIndexOf('.') + 1, numWind.getText().toString().length());
+									floatPartLen = floatPart.length();
+									if(floatPartLen > 9)
+									{
+										floatPart = floatPart.substring(numWind.getText().toString().lastIndexOf('.') + 1, numWind.getText().toString().lastIndexOf('.') + 10);
+										floatPartLen = 9;
+									}
+								}
+								if(floatPartLen > 1)
+								{
+									while(true)
+									{
+										chflHalf = floatPart.toCharArray();
+										if(floatPartLen > 1 && chflHalf[floatPartLen-1] == '0')
+										{
+											delLastSign();
+											floatPartLen--;
+										}
+										else
+										{
+											break;
+										}
+									}
+									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
+								}
+								if(floatPartLen == 1)
+								{
+									chflHalf = floatPart.toCharArray();
+									if(chflHalf[0] == '0')
+									{
+										delLastSign();
+										delLastSign();
+									}
+									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
+								}
+								if(floatPartLen == 0)
+								{
+									delLastSign();
+									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
+								}
 							}
-							numZpz--;
-							getZpz = new BigDecimal(numbers.get(numbers.size()-1)).setScale(numZpz, RoundingMode.DOWN).doubleValue();
-							numbers.set(numbers.size()-1, getZpz);
-							if(numZpz == 0)
+							catch(Exception e)
 							{
-								dotPressed = false;
-								delLastSign();
-								newNum = true;
+								Log.d("Error e = ", "" + e);
+								Log.d("FloatPartLen = ", "" + floatPartLen);
+								Log.d("Error e = ", "" + e);
+								pmbtn.setEnabled(false);
+								numWind.setText(numWind.getText().toString() + lastCh);
 							}
 						}
 					}
@@ -377,13 +414,12 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void thenCalc()
 	{
+		boolean division = false;
+		boolean notdiv = false;
 		NumberFormat formatter = new DecimalFormat("0.000000000E00");
-		
 		if(dotPressed)										//{ проверка на дробное число
-		{
 			numbers.add(temp/zpz);
-		}
-		else
+		else if(!dotPressed)
 			numbers.add(temp);								//проверка на дробное число }
 		temp = 0;
 		
@@ -396,11 +432,13 @@ public class Calculator extends Fragment implements OnClickListener
 				numbers.set(posNum, res);
 				numbers.remove(posNum+1);
 				operations.remove(posOp);
+				notdiv = true;
 			}
 			else if(operations.get(posOp) == "/")
 			{
 				try
 				{
+					division = true;
 					res = numbers.get(posNum);
 					res = res / numbers.get(posNum+1);
 					numbers.set(posNum, res);
@@ -411,11 +449,11 @@ public class Calculator extends Fragment implements OnClickListener
 				{
 					ac();
 					inf = true;
-					numWind.setText("Inf");
 				}
 			}
 			else if(operations.get(posOp) == "%")
 			{
+				division = true;
 				res = numbers.get(posNum);
 				res = (res / numbers.get(posNum+1)) * 100;
 				numbers.set(posNum, res);
@@ -441,12 +479,14 @@ public class Calculator extends Fragment implements OnClickListener
 				posNum++;
 				res = res + numbers.get(posNum);
 				posOp++;
+				notdiv = true;
 			}
 			else if(operations.get(posOp) == "+" && posOp != 0)
 			{
 				posNum++;
 				res = res + numbers.get(posNum);
 				posOp++;
+				notdiv = true;
 			}
 			
 			else if(operations.get(posOp) == "-" && posOp == 0)
@@ -456,12 +496,14 @@ public class Calculator extends Fragment implements OnClickListener
 				posNum++;
 				res = res - numbers.get(posNum);
 				posOp++;
+				notdiv = true;
 			}
 			else if(operations.get(posOp) == "-" && posOp != 0)
 			{
 				posNum++;
 				res = res - numbers.get(posNum);
 				posOp++;
+				notdiv = true;
 			}
 		}													//обработка менее приоритетных операций (+ -) }
 		
@@ -471,46 +513,45 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		
 		numWind.setText("");
-		try
-		{
-			res = new BigDecimal(res).setScale(10, RoundingMode.UP).doubleValue();
-		}
-		catch(NumberFormatException e)
-		{
-			inf = true;
-		}
 		
 		String strRes = ""+res;
-		char[] chres = strRes.toCharArray();
-		int n = 0;
-		int reslen = strRes.length();
 		boolean dot = false;
-		for(int i = 0; i < reslen; i++)
+		int reslen = strRes.length();
+		int lastPoint = strRes.lastIndexOf('.');
+		if(lastPoint != -1 && division)
 		{
-			if(!dot && chres[i] == '.')
+			dot = true;
+			if(reslen - (lastPoint+1) > 10)
 			{
-				dot = true;
-			}
-			else if(dot)
-			{
-				n++;
+				strRes = strRes.substring(0, lastPoint + 1 + 10);
+				res = Double.parseDouble(strRes);
 			}
 		}
-		if(n == 10)
+		else if (lastPoint != -1 && notdiv)
 		{
-			res = new BigDecimal(res).setScale(9, RoundingMode.DOWN).doubleValue();
+			dot = false;
+			dot = true;
+			if(reslen - (lastPoint+1) > 10)
+			{
+				strRes = strRes.substring(0, lastPoint + 1 + 10);
+				res = Double.parseDouble(strRes);
+			}
 		}
 		
 		if(res - (int)res == 0)
 			numWind.append("" + (int)res);
 		else
 		{
-			if(!dotPress)
+			if(!dotPress && dot && !division)
+			{
 				numWind.append(formatter.format(res));
+			}
 			else
+			{
 				numWind.append("" + res);
+			}
 		}
-
+		
 		posOp = 0;
 		posNum = 0;
 		numbers.clear();
@@ -519,6 +560,15 @@ public class Calculator extends Fragment implements OnClickListener
 		res = 0;
 		resEmpty = false;
 		zpz = 1;
+		
+		String sres = numWind.getText().toString();
+		if(sres.lastIndexOf('E') != -1)
+		{
+			pmbtn.setEnabled(false);
+		}
+		
+		if(numWind.getText().toString().equals("Infinity"))
+			inf = true;
 	}
 	
 	private boolean delLastSign()

@@ -85,10 +85,17 @@ public class Converter extends Fragment implements OnClickListener
         }
 		else
 		{
-        	if(!listGeted)
-        		loadingDataOffline();
-        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
+        	try
+        	{
+        		if(!listGeted)
+            		loadingDataOffline();
+            	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
+            		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
+        	}
+        	catch(NullPointerException e)
+        	{
+        		Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
+        	}
 		}
         
         spin1.setOnItemSelectedListener(new OnItemSelectedListener()
@@ -259,7 +266,13 @@ public class Converter extends Fragment implements OnClickListener
 	
 	private void loadingDataOffline()
 	{
-		int listSize = Integer.parseInt(prefs.getString("ListSize", ""));
+		int listSize = 0;
+		try
+		{
+			listSize = Integer.parseInt(prefs.getString("ListSize", ""));
+		}
+		catch(Exception e)
+		{}
 		int prev = 0;
 		int next = 0;
 		String list = prefs.getString("List", "");
