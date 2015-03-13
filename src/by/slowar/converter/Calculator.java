@@ -1,5 +1,7 @@
 package by.slowar.converter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -34,6 +36,7 @@ public class Calculator extends Fragment implements OnClickListener
 	private long zpz = 1;
 	private String getValues;
 	private boolean inf = false;
+	private boolean percent = false;
 	
 	ArrayList<Double> numbers = new ArrayList<Double>();
 	ArrayList<String> operations = new ArrayList<String>();
@@ -178,6 +181,7 @@ public class Calculator extends Fragment implements OnClickListener
 		dotPress = false;
 		inf = false;
 		pmbtn.setEnabled(true);
+		percent = false;
 	}
 	
 	private void number(int number)
@@ -454,6 +458,7 @@ public class Calculator extends Fragment implements OnClickListener
 			else if(operations.get(posOp) == "%")
 			{
 				division = true;
+				percent = true;
 				res = numbers.get(posNum);
 				res = (res / numbers.get(posNum+1)) * 100;
 				numbers.set(posNum, res);
@@ -529,12 +534,14 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		else if (lastPoint != -1 && notdiv)
 		{
+			Toast.makeText(getActivity(), "nodivision", Toast.LENGTH_LONG).show();
 			dot = false;
-			dot = true;
-			if(reslen - (lastPoint+1) > 10)
+			if(reslen - (lastPoint+1) > 10 && dotPress)
 			{
+				Toast.makeText(getActivity(), "1) " + strRes, Toast.LENGTH_LONG).show();
 				strRes = strRes.substring(0, lastPoint + 1 + 10);
 				res = Double.parseDouble(strRes);
+				Toast.makeText(getActivity(), "2) " + strRes, Toast.LENGTH_LONG).show();
 			}
 		}
 		
@@ -542,9 +549,10 @@ public class Calculator extends Fragment implements OnClickListener
 			numWind.append("" + (int)res);
 		else
 		{
-			if(!dotPress && dot && !division)
+			if(!dotPress && dot && !division && !percent)
 			{
 				numWind.append(formatter.format(res));
+				Toast.makeText(getActivity(), "dotPress = " + dotPress + " dot = " + dot + " division = " + division + " percent = " + percent, Toast.LENGTH_LONG).show();
 			}
 			else
 			{
