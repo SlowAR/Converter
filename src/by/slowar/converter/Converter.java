@@ -36,21 +36,18 @@ public class Converter extends Fragment implements OnClickListener
 	boolean listGeted = false;
 	double firstValue, secondValue;
 	double kurs = 0.82;
-	int k;
 	String first, second, temp;
 	ConnectivityManager cm;
 	CheckInternet chnet;
 	SharedPreferences prefs;
-	Main main;
 	
 	ArrayList<String> curr = new ArrayList<String>();
 	ArrayAdapter<String> adapter;
 	
-	public Converter(ConnectivityManager cm, SharedPreferences prefs, Main main)
+	public Converter(ConnectivityManager cm, SharedPreferences prefs)
 	{
 		this.cm = cm;
 		this.prefs = prefs;
-		this.main = main;
 	}
 
 	@Override
@@ -79,10 +76,8 @@ public class Converter extends Fragment implements OnClickListener
         currencies = new Currencies(this, prefs);
         
         if(chnet.connet(cm))
-        {
         	if(!listGeted)
         		currencies.getList();
-        }
 		else
 		{
         	try
@@ -107,13 +102,10 @@ public class Converter extends Fragment implements OnClickListener
 				{
 					((TextView) parent.getChildAt(0)).setText(spin1.getSelectedItem().toString().substring(0, 3));
 				}
-				catch(NullPointerException e)
-				{}
+				catch(NullPointerException e){}
 				
 		        if(chnet.connet(cm))
-		        {
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
-		        }
 		        else
 		        {
 		        	try
@@ -137,9 +129,7 @@ public class Converter extends Fragment implements OnClickListener
 			}
 
 			@Override
-			public void onNothingSelected(AdapterView<?> arg0)
-			{
-			}
+			public void onNothingSelected(AdapterView<?> arg0){}
 		});
         
         spin2.setOnItemSelectedListener(new OnItemSelectedListener()
@@ -151,13 +141,10 @@ public class Converter extends Fragment implements OnClickListener
 				{
 					((TextView) parent.getChildAt(0)).setText(spin2.getSelectedItem().toString().substring(0, 3));
 				}
-				catch(NullPointerException e)
-				{}
+				catch(NullPointerException e){}
 				
 		        if(chnet.connet(cm))
-		        {
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
-		        }
 		        else
 		        {
 		        	try
@@ -181,9 +168,7 @@ public class Converter extends Fragment implements OnClickListener
 			}
 
 			@Override
-			public void onNothingSelected(AdapterView<?> arg0)
-			{
-			}
+			public void onNothingSelected(AdapterView<?> arg0){}
 		});
 
         return view;
@@ -236,30 +221,20 @@ public class Converter extends Fragment implements OnClickListener
 		        if(chnet.connet(cm))
 		        {
 		        	if(!listGeted)
-		        	{
 		        		currencies.getList();
-		        	}
 		        	else
-		        	{
 		        		currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
-		        	}
 		        }
 				else
 				{
 					Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
 		        	if(!listGeted)
-		        	{
 		        		loadingDataOffline();
-		        	}
 		        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-		        	{
 		        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-		        	}
 				}
 			}
-			catch(Exception e)
-			{
-			}
+			catch(Exception e){}
 			break;
 		}
 	}
@@ -271,8 +246,8 @@ public class Converter extends Fragment implements OnClickListener
 		{
 			listSize = Integer.parseInt(prefs.getString("ListSize", ""));
 		}
-		catch(Exception e)
-		{}
+		catch(Exception e){}
+		
 		int prev = 0;
 		int next = 0;
 		String list = prefs.getString("List", "");
@@ -289,9 +264,7 @@ public class Converter extends Fragment implements OnClickListener
 					break;
     			}
 				else
-				{
 					next++;
-				}
 			}
 		}
 		

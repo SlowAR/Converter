@@ -17,7 +17,6 @@ public class Main extends FragmentActivity
 {
 	PagerAdapter adapter;
 	ViewPager mPager;
-	Main main;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) 
@@ -25,8 +24,6 @@ public class Main extends FragmentActivity
 		super.onCreate(savedInstanceState);
 		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 		setContentView(R.layout.main);
-		
-		main = this;
 		
 		mPager = (ViewPager) findViewById(R.id.pager);
         PagerTabStrip pagerTabStrip = (PagerTabStrip) findViewById(R.id.pagerTabStrip);
@@ -61,8 +58,8 @@ public class Main extends FragmentActivity
 	    public TitleAdapter(FragmentManager fm) 
 	    {
 	        super(fm);
-	        frags[0] = new Converter((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE), getPreferences(MODE_PRIVATE), main);
-	        frags[1] = new Calculator(main);
+	        frags[0] = new Converter((ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE), getPreferences(MODE_PRIVATE));
+	        frags[1] = new Calculator();
 	    }
 	 
 	    @Override

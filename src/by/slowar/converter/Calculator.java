@@ -1,10 +1,14 @@
 package by.slowar.converter;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,9 +22,6 @@ public class Calculator extends Fragment implements OnClickListener
 	Button zero, one, two, three, four, five, six, seven, eight, nine;
 	Button dot, div, mul, plus, minus, ac, useValues, pmbtn, perbtn, then;
 	EditText numWind, ettwo;
-	StringBuilder line = new StringBuilder();
-	String resultLine;
-	Main main;
 	
 	private boolean dotPressed;
 	private boolean dotPress;
@@ -37,11 +38,6 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	ArrayList<Double> numbers = new ArrayList<Double>();
 	ArrayList<String> operations = new ArrayList<String>();
-	
-	public Calculator(Main main)
-	{
-		this.main = main;
-	}
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -184,9 +180,7 @@ public class Calculator extends Fragment implements OnClickListener
 	private void number(int number)
 	{
 		if(!resEmpty)
-		{
 			Toast.makeText(getActivity(), R.string.chooseOp, Toast.LENGTH_LONG).show();
-		}
 		else
 		{
 			if(number == 0)
@@ -253,9 +247,7 @@ public class Calculator extends Fragment implements OnClickListener
 		{
 			getValues = ettwo.getText().toString();
 			if((numbers.size() == operations.size() && temp != 0) || (numbers.size() > operations.size() && temp == 0))
-			{
 				Toast.makeText(getActivity(), R.string.nooper, Toast.LENGTH_LONG).show();
-			}
 			else
 			{
 				numWind.append(getValues);
@@ -263,9 +255,7 @@ public class Calculator extends Fragment implements OnClickListener
 				resEmpty = false;
 				String sres = numWind.getText().toString();
 				if(sres.lastIndexOf('E') != -1)
-				{
 					pmbtn.setEnabled(false);
-				}
 			}
 		}
 		catch(Exception e)
@@ -276,18 +266,44 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void percent()
 	{
+		Log.d("Start Percent", "Start Percent");
 		if(resEmpty == true)
 		{
-			numWind.append("%");
-			numbers.add(temp);
-			operations.add("%");
-			temp = 0;
+			Log.d("resEmpty", "true");
+			if(temp != 0)
+			{
+				Log.d("temp", "!=0");
+				numWind.append("%");
+				numbers.add(temp);
+				operations.add("%");
+				temp = 0;
+			}
+			else if(numbers.size() > operations.size())
+			{
+				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
+				numWind.append("%");
+				numbers.add(temp);
+				operations.add("%");
+				temp = 0;
+			}
 		}
 		else
 		{
-			numWind.append("%");
-			operations.add("%");
-			resEmpty = true;
+			Log.d("resEmpty", "false");
+			if(temp != 0)
+			{
+				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
+				numWind.append("%");
+				operations.add("%");
+				resEmpty = true;
+			}
+			if(numbers.size() > operations.size())
+			{
+				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
+				numWind.append("%");
+				operations.add("%");
+				resEmpty = true;
+			}
 		}
 	}
 	
@@ -333,9 +349,7 @@ public class Calculator extends Fragment implements OnClickListener
 								resEmpty = false;
 							}
 							else if(numbers.get(numbers.size()-1) == 0 && operations.size() == 0)
-							{
 								ac();
-							}
 						}
 						else
 						{
@@ -365,9 +379,7 @@ public class Calculator extends Fragment implements OnClickListener
 											floatPartLen--;
 										}
 										else
-										{
 											break;
-										}
 									}
 									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
 								}
@@ -507,19 +519,16 @@ public class Calculator extends Fragment implements OnClickListener
 		}													//обработка менее приоритетных операций (+ -) }
 		
 		if(operations.isEmpty() && !numbers.isEmpty())
-		{
 			res = numbers.get(posNum);
-		}
 		
 		numWind.setText("");
 		
 		String strRes = ""+res;
-		boolean dot = false;
 		int reslen = strRes.length();
 		int lastPoint = strRes.lastIndexOf('.');
-		if(lastPoint != -1 && division)
+		int lastE = strRes.lastIndexOf('E');
+		if(lastPoint != -1 && lastE == -1 && division)
 		{
-			dot = true;
 			if(reslen - (lastPoint+1) > 10)
 			{
 				strRes = strRes.substring(0, lastPoint + 1 + 10);
@@ -528,7 +537,6 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		else if (lastPoint != -1 && notdiv)
 		{
-			dot = false;
 			if(reslen - (lastPoint+1) > 10 && dotPress)
 			{
 				strRes = strRes.substring(0, lastPoint + 1 + 10);
@@ -537,16 +545,35 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		
 		if(res - (int)res == 0)
+		{
 			numWind.append("" + (int)res);
+		}
 		else
 		{
-			if(!dotPress && dot && !division && !percent)
+			if(!dotPress && !division && !percent)
 			{
 				numWind.append(formatter.format(res));
 			}
 			else
 			{
-				numWind.append("" + res);
+				String resln = "" + res;
+				int eindex = resln.lastIndexOf('E');
+				if(eindex != -1)
+				{
+					if(resln.length() - (eindex+1) > 1)
+					{
+						numWind.append(formatter.format(res));
+					}
+					else if(resln.length() - (eindex+1) == 1)
+					{
+						String resWind = new BigDecimal(res).toPlainString();
+						numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
+					}
+					else
+						numWind.append("" + res);
+				}
+				else
+					numWind.append("" + res);
 			}
 		}
 		
@@ -560,12 +587,12 @@ public class Calculator extends Fragment implements OnClickListener
 		zpz = 1;
 		
 		String sres = numWind.getText().toString();
-		if(sres.lastIndexOf('E') != -1)
-		{
+		if(sres.lastIndexOf('E') == -1)
+			pmbtn.setEnabled(true);
+		else
 			pmbtn.setEnabled(false);
-		}
 		
-		if(numWind.getText().toString().equals("Infinity"))
+		if(numWind.getText().toString().equals("Infinity") || numWind.getText().toString().equals("NaN"))
 			inf = true;
 	}
 	
