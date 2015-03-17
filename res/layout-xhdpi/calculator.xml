@@ -27,7 +27,6 @@
                 android:gravity="right|center_vertical"
                 android:inputType="text"
                 android:singleLine="true"
-                android:text="123"
                 android:textSize="25sp" >
 
                 <requestFocus />

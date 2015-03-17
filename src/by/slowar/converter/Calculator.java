@@ -266,10 +266,8 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void percent()
 	{
-		Log.d("Start Percent", "Start Percent");
 		if(resEmpty == true)
 		{
-			Log.d("resEmpty", "true");
 			if(temp != 0)
 			{
 				Log.d("temp", "!=0");
@@ -280,7 +278,6 @@ public class Calculator extends Fragment implements OnClickListener
 			}
 			else if(numbers.size() > operations.size())
 			{
-				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
 				numWind.append("%");
 				numbers.add(temp);
 				operations.add("%");
@@ -289,17 +286,14 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 		else
 		{
-			Log.d("resEmpty", "false");
 			if(temp != 0)
 			{
-				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
 				numWind.append("%");
 				operations.add("%");
 				resEmpty = true;
 			}
 			if(numbers.size() > operations.size())
 			{
-				Log.d("numbers.size() > operations.size()", "numbers.size() > operations.size()");
 				numWind.append("%");
 				operations.add("%");
 				resEmpty = true;
@@ -426,6 +420,10 @@ public class Calculator extends Fragment implements OnClickListener
 	{
 		boolean division = false;
 		boolean notdiv = false;
+		boolean summ = false;
+		boolean eqag = false;
+		if(operations.isEmpty() && !numbers.isEmpty())
+			eqag = true;
 		NumberFormat formatter = new DecimalFormat("0.000000000E00");
 		if(dotPressed)										//{ проверка на дробное число
 			numbers.add(temp/zpz);
@@ -491,6 +489,7 @@ public class Calculator extends Fragment implements OnClickListener
 				res = res + numbers.get(posNum);
 				posOp++;
 				notdiv = true;
+				summ = true;
 			}
 			else if(operations.get(posOp) == "+" && posOp != 0)
 			{
@@ -498,6 +497,7 @@ public class Calculator extends Fragment implements OnClickListener
 				res = res + numbers.get(posNum);
 				posOp++;
 				notdiv = true;
+				summ = true;
 			}
 			
 			else if(operations.get(posOp) == "-" && posOp == 0)
@@ -519,61 +519,99 @@ public class Calculator extends Fragment implements OnClickListener
 		}													//обработка менее приоритетных операций (+ -) }
 		
 		if(operations.isEmpty() && !numbers.isEmpty())
+		{
 			res = numbers.get(posNum);
+		}
 		
 		numWind.setText("");
 		
+		Log.d("Error", "Start");
 		String strRes = ""+res;
 		int reslen = strRes.length();
 		int lastPoint = strRes.lastIndexOf('.');
 		int lastE = strRes.lastIndexOf('E');
-		if(lastPoint != -1 && lastE == -1 && division)
+		Log.d("res = ", "" + res);
+		if(lastPoint != -1 && lastE == -1 && reslen - (lastPoint+1) > 10)
 		{
-			if(reslen - (lastPoint+1) > 10)
+			Log.d("Error", "2");
+			if(division)
 			{
-				strRes = strRes.substring(0, lastPoint + 1 + 10);
-				res = Double.parseDouble(strRes);
+				Log.d("Error", "3");
+				if(!dotPress)
+				{
+					Log.d("Error", "3.1");
+					strRes = strRes.substring(0, lastPoint + 1 + 10);
+					res = Double.parseDouble(strRes);
+				}
+				else
+				{
+					Log.d("Error", "3.2");
+					res = Double.parseDouble(strRes);
+					res = new BigDecimal(res).setScale(9, RoundingMode.UP).doubleValue();
+				}
 			}
-		}
-		else if (lastPoint != -1 && notdiv)
-		{
-			if(reslen - (lastPoint+1) > 10 && dotPress)
+			else if(notdiv && dotPress)
 			{
-				strRes = strRes.substring(0, lastPoint + 1 + 10);
-				res = Double.parseDouble(strRes);
+				Log.d("Error", "4");
+				if(!summ)
+				{
+					Log.d("Error", "5");
+					strRes = strRes.substring(0, lastPoint + 1 + 10);
+					res = Double.parseDouble(strRes);
+				}
+				else
+				{
+					Log.d("Error", "6");
+					strRes = strRes.substring(0, lastPoint + 1 + 10);
+					res = Double.parseDouble(strRes);
+					res = new BigDecimal(res).setScale(9, RoundingMode.UP).doubleValue();
+				}
 			}
 		}
 		
 		if(res - (int)res == 0)
 		{
+			Log.d("Error", "7");
 			numWind.append("" + (int)res);
 		}
 		else
 		{
-			if(!dotPress && !division && !percent)
+			Log.d("Error", "8");
+			if(!dotPress && !division && !percent && !eqag)
 			{
+				Log.d("Error", "9");
 				numWind.append(formatter.format(res));
 			}
 			else
 			{
+				Log.d("Error", "10");
 				String resln = "" + res;
 				int eindex = resln.lastIndexOf('E');
 				if(eindex != -1)
 				{
+					Log.d("Error", "11");
 					if(resln.length() - (eindex+1) > 1)
 					{
+						Log.d("Error", "12");
 						numWind.append(formatter.format(res));
 					}
 					else if(resln.length() - (eindex+1) == 1)
 					{
+						Log.d("Error", "13");
 						String resWind = new BigDecimal(res).toPlainString();
 						numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
 					}
 					else
+					{
+						Log.d("Error", "14");
 						numWind.append("" + res);
+					}
 				}
 				else
+				{
+					Log.d("Error", "15");
 					numWind.append("" + res);
+				}
 			}
 		}
 		

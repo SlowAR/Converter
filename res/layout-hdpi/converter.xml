@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_weight="0.3"
-                android:text="@string/swap"
+                android:drawableTop="@drawable/swap"
                 android:textSize="15dp" />
 
             <Button
@@ -56,7 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_weight="0.7"
-                android:text="@string/swap"
+                android:drawableTop="@drawable/swap"
                 android:textSize="15dp" />
 
         </LinearLayout>
@@ -80,6 +80,7 @@
                 android:id="@+id/spinner2"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
+                android:layout_marginTop="3dp"
                 android:layout_weight="0.7"
                 android:entries="@array/MoneyName" />
 
@@ -150,7 +151,7 @@
                 android:id="@+id/convertbtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
+                android:layout_marginBottom="23dp"
                 android:text="@string/convert"
                 android:textSize="30sp" />
         </RelativeLayout>

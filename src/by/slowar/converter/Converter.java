@@ -3,12 +3,14 @@ package by.slowar.converter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+
 import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -80,17 +82,11 @@ public class Converter extends Fragment implements OnClickListener
         		currencies.getList();
 		else
 		{
-        	try
-        	{
-        		if(!listGeted)
-            		loadingDataOffline();
-            	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-            		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-        	}
-        	catch(NullPointerException e)
-        	{
-        		Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
-        	}
+			Log.d("Error", "1");
+			if(!listGeted)
+        		loadingDataOffline();
+        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
+        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
 		}
         
         spin1.setOnItemSelectedListener(new OnItemSelectedListener()
@@ -101,6 +97,7 @@ public class Converter extends Fragment implements OnClickListener
 				try
 				{
 					((TextView) parent.getChildAt(0)).setText(spin1.getSelectedItem().toString().substring(0, 3));
+					Log.d("Error", "2");
 				}
 				catch(NullPointerException e){}
 				
@@ -108,20 +105,25 @@ public class Converter extends Fragment implements OnClickListener
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
 		        else
 		        {
+		        	Log.d("Error", "3");
 		        	try
 		        	{
+		        		Log.d("Error", "4");
 		        		jsonRes.setText(prefs.getString(spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
-			        	tvupd.setText(prefs.getString("T" + spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
+		        		Log.d("jsonRes", jsonRes.getText().toString());
+		        		tvupd.setText(prefs.getString("T" + spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	kurs = Double.parseDouble(jsonRes.getText().toString());
 		        	}
 		        	catch(Exception e)
 		        	{
+		        		Log.d("Error", "5 " + e);
 		        		jsonRes.setText("");
 		        		tvupd.setText(R.string.nodata);
 		        	}
 		        }
 		        if(listGeted)
 		        {
+		        	Log.d("Error", "6");
 		        	Editor edit = prefs.edit();
 					edit.putString("spin1", ""+spin1.getSelectedItemPosition());
 					edit.commit();
@@ -140,6 +142,7 @@ public class Converter extends Fragment implements OnClickListener
 				try
 				{
 					((TextView) parent.getChildAt(0)).setText(spin2.getSelectedItem().toString().substring(0, 3));
+					Log.d("Error", "7");
 				}
 				catch(NullPointerException e){}
 				
@@ -147,20 +150,24 @@ public class Converter extends Fragment implements OnClickListener
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
 		        else
 		        {
+		        	Log.d("Error", "8");
 		        	try
 		        	{
+		        		Log.d("Error", "9");
 		        		jsonRes.setText(prefs.getString(spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	tvupd.setText(prefs.getString("T" + spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	kurs = Double.parseDouble(jsonRes.getText().toString());
 		        	}
 		        	catch(Exception e)
 		        	{
+		        		Log.d("Error", "10");
 		        		jsonRes.setText("");
 		        		tvupd.setText(R.string.nodata);
 		        	}
 		        }
 		        if(listGeted)
 		        {
+		        	Log.d("Error", "11");
 		        	Editor edit = prefs.edit();
 					edit.putString("spin2", ""+spin2.getSelectedItemPosition());
 					edit.commit();
@@ -170,6 +177,8 @@ public class Converter extends Fragment implements OnClickListener
 			@Override
 			public void onNothingSelected(AdapterView<?> arg0){}
 		});
+        
+        refresh();
 
         return view;
     }
@@ -215,28 +224,33 @@ public class Converter extends Fragment implements OnClickListener
 			break;
 			
 		case R.id.btnRefresh:
-			jsonRes.setText("loading");
-			try
-			{
-		        if(chnet.connet(cm))
-		        {
-		        	if(!listGeted)
-		        		currencies.getList();
-		        	else
-		        		currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
-		        }
-				else
-				{
-					Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
-		        	if(!listGeted)
-		        		loadingDataOffline();
-		        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-		        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-				}
-			}
-			catch(Exception e){}
+			refresh();
 			break;
 		}
+	}
+	
+	public void refresh()
+	{
+		jsonRes.setText("loading");
+		try
+		{
+	        if(chnet.connet(cm))
+	        {
+	        	if(!listGeted)
+	        		currencies.getList();
+	        	else
+	        		currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
+	        }
+			else
+			{
+				Toast.makeText(getActivity(), R.string.noInternet, Toast.LENGTH_LONG).show();
+	        	if(!listGeted)
+	        		loadingDataOffline();
+	        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
+	        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
+			}
+		}
+		catch(Exception e){}
 	}
 	
 	private void loadingDataOffline()

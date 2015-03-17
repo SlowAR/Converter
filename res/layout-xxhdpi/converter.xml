@@ -44,10 +44,11 @@
 
             <Button
                 android:id="@+id/swap1"
+                style="@drawable/swap"
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_weight="0.3"
-                android:text="@string/swap"
+                android:drawableTop="@drawable/swap"
                 android:textSize="15dp" />
 
             <Button
@@ -55,6 +56,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="35dp"
                 android:layout_weight="0.7"
+                android:drawableTop="@drawable/swap"
                 android:text="@string/swap"
                 android:textSize="15dp" />
 
@@ -68,6 +70,7 @@
                 android:id="@+id/ettwo"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_marginTop="3dp"
                 android:layout_weight="0.3"
                 android:ems="10"
                 android:focusable="false"
@@ -79,6 +82,7 @@
                 android:id="@+id/spinner2"
                 android:layout_width="match_parent"
                 android:layout_height="70dp"
+                android:layout_marginTop="3dp"
                 android:layout_weight="0.7" />
 
         </LinearLayout>
@@ -147,8 +151,8 @@
             <Button
                 android:id="@+id/convertbtn"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="30dp"
+                android:layout_height="70dp"
+                android:layout_marginBottom="32dp"
                 android:text="@string/convert"
                 android:textSize="30sp" />
 
