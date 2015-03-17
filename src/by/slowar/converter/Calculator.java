@@ -35,6 +35,7 @@ public class Calculator extends Fragment implements OnClickListener
 	private String getValues;
 	private boolean inf = false;
 	private boolean percent = false;
+	private boolean division = false;
 	
 	ArrayList<Double> numbers = new ArrayList<Double>();
 	ArrayList<String> operations = new ArrayList<String>();
@@ -175,6 +176,7 @@ public class Calculator extends Fragment implements OnClickListener
 		inf = false;
 		pmbtn.setEnabled(true);
 		percent = false;
+		division = false;
 	}
 	
 	private void number(int number)
@@ -418,9 +420,9 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void thenCalc()
 	{
-		boolean division = false;
 		boolean notdiv = false;
 		boolean summ = false;
+		boolean mult = false;
 		boolean eqag = false;
 		if(operations.isEmpty() && !numbers.isEmpty())
 			eqag = true;
@@ -441,6 +443,7 @@ public class Calculator extends Fragment implements OnClickListener
 				numbers.remove(posNum+1);
 				operations.remove(posOp);
 				notdiv = true;
+				mult = true;
 			}
 			else if(operations.get(posOp) == "/")
 			{
@@ -587,29 +590,39 @@ public class Calculator extends Fragment implements OnClickListener
 				Log.d("Error", "10");
 				String resln = "" + res;
 				int eindex = resln.lastIndexOf('E');
+				char chresln[] = resln.toCharArray();
 				if(eindex != -1)
 				{
 					Log.d("Error", "11");
 					if(resln.length() - (eindex+1) > 1)
 					{
-						Log.d("Error", "12");
-						numWind.append(formatter.format(res));
+						if(chresln[eindex+1] == '0')
+						{
+							Log.d("Error", "12");
+							String resWind = new BigDecimal(res).toPlainString();
+							numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
+						}
+						else
+						{
+							Log.d("Error", "13");
+							numWind.append(formatter.format(res));
+						}
 					}
 					else if(resln.length() - (eindex+1) == 1)
 					{
-						Log.d("Error", "13");
+						Log.d("Error", "14");
 						String resWind = new BigDecimal(res).toPlainString();
 						numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
 					}
 					else
 					{
-						Log.d("Error", "14");
+						Log.d("Error", "15");
 						numWind.append("" + res);
 					}
 				}
 				else
 				{
-					Log.d("Error", "15");
+					Log.d("Error", "16");
 					numWind.append("" + res);
 				}
 			}
