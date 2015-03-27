@@ -36,7 +36,7 @@ public class Converter extends Fragment implements OnClickListener
 	ProgressDialog loadingData;
 	
 	boolean listGeted = false;
-	double firstValue, secondValue;
+	BigDecimal firstValue, secondValue;
 	double kurs = 0.82;
 	String first, second, temp;
 	ConnectivityManager cm;
@@ -77,17 +77,18 @@ public class Converter extends Fragment implements OnClickListener
         
         currencies = new Currencies(this, prefs);
         
-        if(chnet.connet(cm))
-        	if(!listGeted)
-        		currencies.getList();
-		else
-		{
-			Log.d("Error", "1");
-			if(!listGeted)
-        		loadingDataOffline();
-        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-		}
+//        if(chnet.connet(cm))
+//        	if(!listGeted)
+//        		currencies.getList();
+//		else
+//		{
+//			if(!listGeted)
+//        		loadingDataOffline();
+//        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
+//        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
+//		}
+        
+        refresh();
         
         spin1.setOnItemSelectedListener(new OnItemSelectedListener()
         {
@@ -97,7 +98,6 @@ public class Converter extends Fragment implements OnClickListener
 				try
 				{
 					((TextView) parent.getChildAt(0)).setText(spin1.getSelectedItem().toString().substring(0, 3));
-					Log.d("Error", "2");
 				}
 				catch(NullPointerException e){}
 				
@@ -105,25 +105,20 @@ public class Converter extends Fragment implements OnClickListener
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
 		        else
 		        {
-		        	Log.d("Error", "3");
 		        	try
 		        	{
-		        		Log.d("Error", "4");
 		        		jsonRes.setText(prefs.getString(spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
-		        		Log.d("jsonRes", jsonRes.getText().toString());
 		        		tvupd.setText(prefs.getString("T" + spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	kurs = Double.parseDouble(jsonRes.getText().toString());
 		        	}
 		        	catch(Exception e)
 		        	{
-		        		Log.d("Error", "5 " + e);
 		        		jsonRes.setText("");
 		        		tvupd.setText(R.string.nodata);
 		        	}
 		        }
 		        if(listGeted)
 		        {
-		        	Log.d("Error", "6");
 		        	Editor edit = prefs.edit();
 					edit.putString("spin1", ""+spin1.getSelectedItemPosition());
 					edit.commit();
@@ -142,7 +137,6 @@ public class Converter extends Fragment implements OnClickListener
 				try
 				{
 					((TextView) parent.getChildAt(0)).setText(spin2.getSelectedItem().toString().substring(0, 3));
-					Log.d("Error", "7");
 				}
 				catch(NullPointerException e){}
 				
@@ -150,24 +144,20 @@ public class Converter extends Fragment implements OnClickListener
 		        	currencies.getCurrency(spin1.getSelectedItem().toString().substring(0, 3), spin2.getSelectedItem().toString().substring(0, 3));
 		        else
 		        {
-		        	Log.d("Error", "8");
 		        	try
 		        	{
-		        		Log.d("Error", "9");
 		        		jsonRes.setText(prefs.getString(spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	tvupd.setText(prefs.getString("T" + spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3), ""));
 			        	kurs = Double.parseDouble(jsonRes.getText().toString());
 		        	}
 		        	catch(Exception e)
 		        	{
-		        		Log.d("Error", "10");
 		        		jsonRes.setText("");
 		        		tvupd.setText(R.string.nodata);
 		        	}
 		        }
 		        if(listGeted)
 		        {
-		        	Log.d("Error", "11");
 		        	Editor edit = prefs.edit();
 					edit.putString("spin2", ""+spin2.getSelectedItemPosition());
 					edit.commit();
@@ -178,7 +168,7 @@ public class Converter extends Fragment implements OnClickListener
 			public void onNothingSelected(AdapterView<?> arg0){}
 		});
         
-        refresh();
+        //refresh();
 
         return view;
     }
@@ -197,12 +187,18 @@ public class Converter extends Fragment implements OnClickListener
 		case R.id.convertbtn:
 			try
 			{
-				firstValue = Double.parseDouble(etone.getText().toString());
-				secondValue = new BigDecimal(firstValue * kurs).setScale(3, RoundingMode.UP).doubleValue();
-				ettwo.setText("" + secondValue);
+				firstValue = new BigDecimal(etone.getText().toString());
+				secondValue = new BigDecimal(kurs);
+				firstValue = firstValue.multiply(secondValue);
+				Log.d("Error", "1");
+				if(firstValue.compareTo(firstValue.setScale(0, RoundingMode.UP)) == 0)
+					ettwo.setText("" + firstValue.setScale(0, RoundingMode.UP));
+				else
+					ettwo.setText("" + firstValue.setScale(6, RoundingMode.UP).stripTrailingZeros());
 			}
 			catch(Exception e)
 			{
+				Log.d("Error", "" + e);
 				Toast.makeText(getActivity(), R.string.errorvalues, Toast.LENGTH_LONG).show();
 			}
 			break;

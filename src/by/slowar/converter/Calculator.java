@@ -2,13 +2,9 @@ package by.slowar.converter;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.ArrayList;
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,21 +20,23 @@ public class Calculator extends Fragment implements OnClickListener
 	EditText numWind, ettwo;
 	
 	private boolean dotPressed;
-	private boolean dotPress;
 	private int posNum;
 	private int posOp;
 	private int lineLength;
-	private double temp;
-	private double res;	
-	private boolean resEmpty = true;
-	private long zpz = 1;
+	private BigDecimal temp;
+	private BigDecimal res;	
+	private boolean resEmpty;
+	private BigDecimal zpz;
 	private String getValues;
-	private boolean inf = false;
-	private boolean percent = false;
-	private boolean division = false;
+	private boolean inf;
+	private boolean operPressed;
+	private boolean nonfull;
+	private boolean negadded;
+	private boolean negative;
+	private boolean usedValues;
 	
-	ArrayList<Double> numbers = new ArrayList<Double>();
-	ArrayList<String> operations = new ArrayList<String>();
+	private ArrayList<BigDecimal> numbers = new ArrayList<BigDecimal>();
+	private ArrayList<String> operations = new ArrayList<String>();
 	
 	@Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -88,6 +86,16 @@ public class Calculator extends Fragment implements OnClickListener
         perbtn.setOnClickListener(this);
         then.setOnClickListener(this);
         
+        temp = new BigDecimal(0);
+        zpz = new BigDecimal(1);
+        operPressed = true;
+        resEmpty = true;
+        inf = false;
+        nonfull = false;
+        negadded = false;
+        negative = false;
+        usedValues = false;
+        
         return view;
     }
 
@@ -97,42 +105,34 @@ public class Calculator extends Fragment implements OnClickListener
 		switch(v.getId())
 		{
 		case R.id.zero:
-			number(0);
+			number(new BigDecimal(0));
 			break;
 		case R.id.one:
-			number(1);
+			number(new BigDecimal(1));
 			break;
 		case R.id.two:
-			number(2);
+			number(new BigDecimal(2));
 			break;
 		case R.id.three:
-			number(3);
+			number(new BigDecimal(3));
 			break;
 		case R.id.four:
-			number(4);
+			number(new BigDecimal(4));
 			break;
 		case R.id.five:
-			number(5);
+			number(new BigDecimal(5));
 			break;
 		case R.id.six:
-			number(6);
+			number(new BigDecimal(6));
 			break;
 		case R.id.seven:
-			number(7);
+			number(new BigDecimal(7));
 			break;
 		case R.id.eight:
-			number(8);
+			number(new BigDecimal(8));
 			break;
 		case R.id.nine:
-			number(9);
-			break;
-		case R.id.dot:
-			if(!dotPressed)
-			{
-				numWind.append(".");
-				dotPressed = true;
-				dotPress = true;
-			}
+			number(new BigDecimal(9));
 			break;
 		case R.id.div:
 			operation("/");
@@ -146,17 +146,24 @@ public class Calculator extends Fragment implements OnClickListener
 		case R.id.minus:
 			operation("-");
 			break;
+		case R.id.perbtn:
+			operation("%");
+			break;
 		case R.id.ac:
 			ac();
+			break;
+		case R.id.dot:
+			if(!dotPressed)
+			{
+				numWind.append(".");
+				dotPressed = true;
+			}
 			break;
 		case R.id.useValues:
 			useValues();
 			break;
 		case R.id.pmbtn:
 			delSign();
-			break;
-		case R.id.perbtn:
-			percent();
 			break;
 		case R.id.then:
 			thenCalc();
@@ -169,96 +176,206 @@ public class Calculator extends Fragment implements OnClickListener
 		numWind.setText("");
 		numbers.clear();
 		operations.clear();
-		temp = 0;
+		temp = new BigDecimal(0);
 		resEmpty = true;
 		dotPressed = false;
-		dotPress = false;
 		inf = false;
 		pmbtn.setEnabled(true);
-		percent = false;
-		division = false;
+		zpz = new BigDecimal(1);
+		operPressed = true;
+		nonfull = false;
+		negadded = false;
+		negative = false;
+		usedValues = false;
 	}
 	
-	private void number(int number)
+	private void number(BigDecimal number)
 	{
-		if(!resEmpty)
-			Toast.makeText(getActivity(), R.string.chooseOp, Toast.LENGTH_LONG).show();
-		else
+		if(inf)
+			ac();
+		if(nonfull)	//changing in collection
 		{
-			if(number == 0)
+			if(dotPressed)
 			{
-				numWind.append("0");
-				temp = temp * 10;
+				numWind.append(number.toString());
+				for(int i = 0; i <= numbers.get(numbers.size()-1).scale(); i++)
+					number = number.divide(new BigDecimal(10), 9, RoundingMode.UP);
+				numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).add(number));
 			}
 			else
 			{
 				numWind.append("" + number);
-				if(temp == 0)
-					temp = number;
-				else
-					temp = temp * 10 + number;
+				numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).multiply(new BigDecimal(10)).add(number));
 			}
-			if(dotPressed)
-				zpz = zpz * 10;
 		}
+		else	//changing in temp
+		{
+			numWind.append("" + number);
+			temp = temp.multiply(new BigDecimal(10)).add(number);
+			if(dotPressed)
+				zpz = zpz.multiply(new BigDecimal(10));
+		}
+		operPressed = false;
+		negadded = false;
 	}
 	
 	private void operation(String operation)
 	{
-		if(resEmpty)
+		if(inf)
+			ac();
+		
+		if(numbers.size() == operations.size() && temp.compareTo(new BigDecimal(0)) == 0)
+			operPressed = true;
+		
+		if(usedValues)
 		{
-			if(dotPressed)
-			{
-				if(temp != 0)
-				{
-					numbers.add(temp/zpz);
-				}
-				if(numbers.size() > operations.size())
-				{
-					operations.add(operation);
-					numWind.append(operation);
-				}
-				temp = 0;
-			}
-			else
-			{
-				if(temp != 0)
-					numbers.add(temp);
-				if(numbers.size() > operations.size())
-				{
-					operations.add(operation);
-					numWind.append(operation);
-				}
-				temp = 0;
-			}
-			zpz = 1;
-			dotPressed = false;
+			operPressed = false;
+			usedValues = false;
+		}
+		
+		if(!operPressed)
+		{
+			operations.add(operation);
+			numWind.append(operation);
+			operPressed = true;
 		}
 		else
 		{
-			numWind.append(operation);
-			operations.add(operation);
-			resEmpty = true;
-			dotPressed = false;
+			if(numbers.isEmpty() && operation.equals("-"))
+			{
+				negative = true;
+				numWind.append("-");
+				return;
+			}
+			else if(numbers.isEmpty() && operation.equals("+"))
+			{
+				negative = false;
+				numWind.setText("");
+				return;
+			}
+			
+			if(operations.isEmpty())
+				return;
+			
+			if(operations.get(operations.size()-1).equals("*") || operations.get(operations.size()-1).equals("/"))
+			{
+				if(operation.equals("+"))
+				{
+					if(negadded)
+						delLastSign();
+					else
+						negadded = true;
+					
+					numWind.append("+");
+					negative = false;
+					return;
+				}
+				else if(operation.equals("-"))
+				{
+					if(negadded)
+						delLastSign();
+					else
+						negadded = true;
+					
+					numWind.append("-");
+					negative = true;
+					return;
+				}
+				else
+				{
+					if(negadded && operation.equals("*"))
+					{
+						delLastSign();
+						delLastSign();
+						operations.remove(operations.size()-1);
+						operations.add(operation);
+						numWind.append(operation);
+						negadded = false;
+						negative = false;
+						return;
+					}
+					else if(negadded && operation.equals("/"))
+					{
+						delLastSign();
+						delLastSign();
+						operations.remove(operations.size()-1);
+						operations.add(operation);
+						numWind.append(operation);
+						negadded = false;
+						negative = false;
+						return;
+					}
+					else
+					{
+						delLastSign();
+						operations.remove(operations.size()-1);
+						operations.add(operation);
+						numWind.append(operation);
+						return;
+					}
+				}
+			}
+			else
+			{
+				delLastSign();
+				operations.remove(operations.size()-1);
+				operations.add(operation);
+				numWind.append(operation);
+				return;
+			}
 		}
+		
+		if(dotPressed && !nonfull)
+		{
+			if(resEmpty)
+			{
+				numbers.add(temp.divide(zpz));
+				zpz = new BigDecimal(1);
+				dotPressed = false;
+			}
+		}
+		else if (!dotPressed && !nonfull)
+		{
+			if(resEmpty)
+				numbers.add(temp);
+		}
+		else if(dotPressed && nonfull)
+		{
+			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).divide(zpz).stripTrailingZeros());
+			zpz = new BigDecimal(1);
+			dotPressed = false;
+			nonfull = false;
+		}
+		else if(!dotPressed && nonfull)
+			nonfull = false;
+		
+		if(negative)
+		{
+			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).negate());
+			negative = false;
+		}
+		else if(!negative && numbers.size() > 1)
+			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).abs());
+		
+		temp = new BigDecimal(0);
 	}
 	
 	private void useValues()
 	{
+		if(inf)
+			ac();
 		try
 		{
-			getValues = ettwo.getText().toString();
-			if((numbers.size() == operations.size() && temp != 0) || (numbers.size() > operations.size() && temp == 0))
+			getValues = new BigDecimal(ettwo.getText().toString()).toPlainString();
+			if((numbers.size() == operations.size() && temp.compareTo(new BigDecimal(0)) != 0) || (numbers.size() > operations.size() && temp.compareTo(new BigDecimal(0)) == 0))
 				Toast.makeText(getActivity(), R.string.nooper, Toast.LENGTH_LONG).show();
 			else
 			{
 				numWind.append(getValues);
-				numbers.add(Double.parseDouble(getValues));
+				numbers.add(new BigDecimal(getValues));
 				resEmpty = false;
-				String sres = numWind.getText().toString();
-				if(sres.lastIndexOf('E') != -1)
-					pmbtn.setEnabled(false);
 			}
+			usedValues = true;
 		}
 		catch(Exception e)
 		{
@@ -266,209 +383,159 @@ public class Calculator extends Fragment implements OnClickListener
 		}
 	}
 	
-	private void percent()
-	{
-		if(resEmpty == true)
-		{
-			if(temp != 0)
-			{
-				Log.d("temp", "!=0");
-				numWind.append("%");
-				numbers.add(temp);
-				operations.add("%");
-				temp = 0;
-			}
-			else if(numbers.size() > operations.size())
-			{
-				numWind.append("%");
-				numbers.add(temp);
-				operations.add("%");
-				temp = 0;
-			}
-		}
-		else
-		{
-			if(temp != 0)
-			{
-				numWind.append("%");
-				operations.add("%");
-				resEmpty = true;
-			}
-			if(numbers.size() > operations.size())
-			{
-				numWind.append("%");
-				operations.add("%");
-				resEmpty = true;
-			}
-		}
-	}
-	
 	private void delSign()
 	{
-		boolean windClear = false;
-		if(!inf)
-		{
-			char lastCh = 0;
-			if(!numWind.getText().toString().equals(""))
-			{
-				lastCh = numWind.getText().toString().charAt(numWind.getText().toString().length()-1);
-				delLastSign();
-			}
-			if(temp != 0)
-			{
-				if(dotPressed && zpz != 1)
-					zpz = zpz / 10;
-				if(dotPressed && zpz == 1)
-				{
-					dotPressed = false;
-					delLastSign();
-				}
-				temp = temp/10;
-				temp = Math.floor(temp);
-			}
-			else if(temp == 0)
-			{
-				if(!numbers.isEmpty())
-				{
-					if(numbers.size() > operations.size())
-					{
-						if(numbers.get(numbers.size()-1) - Math.floor(numbers.get(numbers.size()-1)) == 0)
-						{
-							double tempNum = numbers.get(numbers.size()-1)/10;
-							numbers.set(numbers.size()-1, Math.floor(tempNum));
-							if(numbers.get(numbers.size()-1) == 0 && operations.size() != 0)
-							{
-								numbers.remove(numbers.size()-1);
-								windClear = delLastSign();
-								if(!windClear)
-									operations.remove(operations.size()-1);
-								resEmpty = false;
-							}
-							else if(numbers.get(numbers.size()-1) == 0 && operations.size() == 0)
-								ac();
-						}
-						else
-						{
-							String floatPart = "";
-							int floatPartLen = 0;
-							char chflHalf[];
-							try
-							{
-								if(numWind.getText().toString().lastIndexOf('.') != -1)
-								{
-									floatPart = numWind.getText().toString().substring(numWind.getText().toString().lastIndexOf('.') + 1, numWind.getText().toString().length());
-									floatPartLen = floatPart.length();
-									if(floatPartLen > 9)
-									{
-										floatPart = floatPart.substring(numWind.getText().toString().lastIndexOf('.') + 1, numWind.getText().toString().lastIndexOf('.') + 10);
-										floatPartLen = 9;
-									}
-								}
-								if(floatPartLen > 1)
-								{
-									while(true)
-									{
-										chflHalf = floatPart.toCharArray();
-										if(floatPartLen > 1 && chflHalf[floatPartLen-1] == '0')
-										{
-											delLastSign();
-											floatPartLen--;
-										}
-										else
-											break;
-									}
-									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
-								}
-								if(floatPartLen == 1)
-								{
-									chflHalf = floatPart.toCharArray();
-									if(chflHalf[0] == '0')
-									{
-										delLastSign();
-										delLastSign();
-									}
-									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
-								}
-								if(floatPartLen == 0)
-								{
-									delLastSign();
-									numbers.set(numbers.size()-1, Double.parseDouble(numWind.getText().toString()));
-								}
-							}
-							catch(Exception e)
-							{
-								pmbtn.setEnabled(false);
-								numWind.setText(numWind.getText().toString() + lastCh);
-							}
-						}
-					}
-					else
-					{
-						operations.remove(operations.size()-1);
-						resEmpty = false;
-					}
-				}
-			}
-		}
-		else
+		if(inf)
 		{
 			numWind.setText("");
 			ac();
 			inf = false;
+			return;
+		}
+		
+		if(!numWind.getText().toString().equals(""))
+			delLastSign();
+		if(numWind.getText().toString().equals("") || numWind.getText().toString().equals("-"))
+		{
+			ac();
+			return;
+		}
+		
+		if(temp.compareTo(new BigDecimal(0)) != 0)
+		{
+			if(dotPressed && zpz.compareTo(new BigDecimal(1)) != 0)
+				zpz = zpz.divide(new BigDecimal(10));
+			if(dotPressed && zpz.compareTo(new BigDecimal(1)) == 0)
+			{
+				dotPressed = false;
+				delLastSign();
+			}
+			temp = temp.divide(new BigDecimal(10));
+			temp = new BigDecimal(temp.doubleValue()).setScale(0, RoundingMode.DOWN);
+		}
+		else
+		{
+			if(numbers.isEmpty())
+			{
+				ac();
+				return;
+			}
+			
+			if(numbers.size() > operations.size())
+			{
+				nonfull = false;
+				int numScale = numbers.get(numbers.size()-1).scale();
+				if(numScale > 1)
+				{
+					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).setScale(numScale-1, RoundingMode.DOWN));
+					nonfull = true;
+				}
+				else if(numScale == 1)
+				{
+					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).setScale(0, RoundingMode.DOWN));
+					delLastSign();
+					if(numWind.getText().toString().equals("0"))
+					{
+						ac();
+						return;
+					}
+					nonfull = true;
+				}
+				else
+					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).divide(new BigDecimal(10)).setScale(0, RoundingMode.DOWN).stripTrailingZeros());
+				
+				if(numbers.get(numbers.size()-1).compareTo(new BigDecimal(0)) == 0)
+				{
+					numbers.remove(numbers.size()-1);
+					return;
+				}
+			}
+			else if(numbers.size() == operations.size())
+			{
+				operations.remove(operations.size()-1);
+				operPressed = false;
+				nonfull = true;
+				char lastChar = numWind.getText().toString().charAt(numWind.getText().length()-1);
+				if(lastChar == '+' || lastChar == '-' || lastChar == '*' || lastChar == '/')
+				{
+					delLastSign();
+					negative = false;
+					negadded = false;
+				}
+			}
+			else
+				Toast.makeText(getActivity(), "Error with composing number and operation collections!", Toast.LENGTH_LONG).show();
 		}
 	}
 	
 	private void thenCalc()
 	{
-		boolean notdiv = false;
-		boolean summ = false;
-		boolean mult = false;
-		boolean eqag = false;
-		if(operations.isEmpty() && !numbers.isEmpty())
-			eqag = true;
-		NumberFormat formatter = new DecimalFormat("0.000000000E00");
-		if(dotPressed)										//{ проверка на дробное число
-			numbers.add(temp/zpz);
-		else if(!dotPressed)
-			numbers.add(temp);								//проверка на дробное число }
-		temp = 0;
+		if(numbers.isEmpty() && operations.isEmpty() && temp.compareTo(new BigDecimal(0)) == 0)
+			return;
 		
-		while(posOp <= operations.size()-1)					//{ обработка приоритетных операций (* / %)
+		if((operations.isEmpty() && !numbers.isEmpty()) || (operations.isEmpty() && temp.compareTo(new BigDecimal(0)) != 0))
+			return;
+		
+		if(dotPressed)
+			numbers.add(temp.divide(zpz));
+		else
+			numbers.add(temp);
+		
+		temp = new BigDecimal(0);
+		
+		if(negative)
+		{
+			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).negate());
+			negadded = false;
+			negative = false;
+		}
+		
+		if(dotPressed && nonfull)
+		{
+			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).divide(zpz).stripTrailingZeros());
+			zpz = new BigDecimal(1);
+			dotPressed = false;
+			nonfull = false;
+		}
+		
+		operPressed = false;
+		nonfull = false;
+		
+		while(posOp <= operations.size()-1)
 		{
 			if(operations.get(posOp) == "*")
 			{
-				res = numbers.get(posNum);
-				res = res * numbers.get(posNum+1);
-				numbers.set(posNum, res);
+				res = numbers.get(posNum).multiply(numbers.get(posNum+1));
+				numbers.set(posNum, res.stripTrailingZeros());
 				numbers.remove(posNum+1);
 				operations.remove(posOp);
-				notdiv = true;
-				mult = true;
 			}
 			else if(operations.get(posOp) == "/")
 			{
 				try
 				{
-					division = true;
-					res = numbers.get(posNum);
-					res = res / numbers.get(posNum+1);
-					numbers.set(posNum, res);
-					numbers.remove(posNum+1);
-					operations.remove(posOp);
+					res = numbers.get(posNum).divide(numbers.get(posNum+1), 10, RoundingMode.UP);
+					res = res.stripTrailingZeros();
 				}
 				catch(ArithmeticException e)
 				{
-					ac();
-					inf = true;
+					if(numbers.get(posNum+1).compareTo(new BigDecimal(0)) == 0)
+					{
+						numWind.setText("");
+						numWind.append("в€ћ");
+						inf = true;
+						return;
+					}
 				}
+				numbers.set(posNum, res.stripTrailingZeros());
+				numbers.remove(posNum+1);
+				operations.remove(posOp);
 			}
 			else if(operations.get(posOp) == "%")
 			{
-				division = true;
-				percent = true;
-				res = numbers.get(posNum);
-				res = (res / numbers.get(posNum+1)) * 100;
-				numbers.set(posNum, res);
+				res = numbers.get(posNum).divide(numbers.get(posNum+1), 9, RoundingMode.UP).multiply(new BigDecimal(100));
+				res = res.stripTrailingZeros();
+				numbers.set(posNum, res.stripTrailingZeros());
 				numbers.remove(posNum+1);
 				operations.remove(posOp);
 			}
@@ -477,155 +544,63 @@ public class Calculator extends Fragment implements OnClickListener
 				posNum++;
 				posOp++;
 			}
-		}													//обработка приоритетных операций (* / %) }									
-		
+		}								
 		posNum = 0;
 		posOp = 0;
 		
-		while(posOp <= operations.size()-1)					//{ обработка менее приоритетных операций (+ -)
+		while(posOp <= operations.size()-1)
 		{
 			if(operations.get(posOp) == "+" && posOp == 0)
 			{
-				res = 0;
 				res = numbers.get(posNum);
 				posNum++;
-				res = res + numbers.get(posNum);
+				res = res.add(numbers.get(posNum));
 				posOp++;
-				notdiv = true;
-				summ = true;
 			}
 			else if(operations.get(posOp) == "+" && posOp != 0)
 			{
 				posNum++;
-				res = res + numbers.get(posNum);
+				res = res.add(numbers.get(posNum));
 				posOp++;
-				notdiv = true;
-				summ = true;
 			}
-			
 			else if(operations.get(posOp) == "-" && posOp == 0)
 			{
-				res = 0;
 				res = numbers.get(posNum);
 				posNum++;
-				res = res - numbers.get(posNum);
+				res = res.subtract(numbers.get(posNum));
 				posOp++;
-				notdiv = true;
 			}
 			else if(operations.get(posOp) == "-" && posOp != 0)
 			{
 				posNum++;
-				res = res - numbers.get(posNum);
+				res = res.subtract(numbers.get(posNum));
 				posOp++;
-				notdiv = true;
-			}
-		}													//обработка менее приоритетных операций (+ -) }
-		
-		if(operations.isEmpty() && !numbers.isEmpty())
-		{
-			res = numbers.get(posNum);
-		}
-		
-		numWind.setText("");
-		
-		Log.d("Error", "Start");
-		String strRes = ""+res;
-		int reslen = strRes.length();
-		int lastPoint = strRes.lastIndexOf('.');
-		int lastE = strRes.lastIndexOf('E');
-		Log.d("res = ", "" + res);
-		if(lastPoint != -1 && lastE == -1 && reslen - (lastPoint+1) > 10)
-		{
-			Log.d("Error", "2");
-			if(division)
-			{
-				Log.d("Error", "3");
-				if(!dotPress)
-				{
-					Log.d("Error", "3.1");
-					strRes = strRes.substring(0, lastPoint + 1 + 10);
-					res = Double.parseDouble(strRes);
-				}
-				else
-				{
-					Log.d("Error", "3.2");
-					res = Double.parseDouble(strRes);
-					res = new BigDecimal(res).setScale(9, RoundingMode.UP).doubleValue();
-				}
-			}
-			else if(notdiv && dotPress)
-			{
-				Log.d("Error", "4");
-				if(!summ)
-				{
-					Log.d("Error", "5");
-					strRes = strRes.substring(0, lastPoint + 1 + 10);
-					res = Double.parseDouble(strRes);
-				}
-				else
-				{
-					Log.d("Error", "6");
-					strRes = strRes.substring(0, lastPoint + 1 + 10);
-					res = Double.parseDouble(strRes);
-					res = new BigDecimal(res).setScale(9, RoundingMode.UP).doubleValue();
-				}
 			}
 		}
 		
-		if(res - (int)res == 0)
+		if(res.toBigInteger().toString().length() > 12 && res.compareTo(new BigDecimal(0)) == 1)
 		{
-			Log.d("Error", "7");
-			numWind.append("" + (int)res);
+			numWind.setText("");
+			numWind.append("в€ћ");
+			inf = true;
+		}
+		else if(res.toBigInteger().toString().length() > 12 && res.compareTo(new BigDecimal(0)) == -1)
+		{
+			numWind.setText("");
+			numWind.append("-в€ћ");
+			inf = true;
+		}
+		else if((res.compareTo(new BigDecimal("1.0E-9")) == -1 && res.compareTo(new BigDecimal(0)) == 1) || (res.compareTo(new BigDecimal(0)) == -1 && res.compareTo(new BigDecimal("-1.0E-9")) == 1))
+		{
+			res = new BigDecimal(0);
+			numWind.setText("");
+			numWind.append("0");
+			numbers.set(numbers.size()-1, res);
 		}
 		else
 		{
-			Log.d("Error", "8");
-			if(!dotPress && !division && !percent && !eqag)
-			{
-				Log.d("Error", "9");
-				numWind.append(formatter.format(res));
-			}
-			else
-			{
-				Log.d("Error", "10");
-				String resln = "" + res;
-				int eindex = resln.lastIndexOf('E');
-				char chresln[] = resln.toCharArray();
-				if(eindex != -1)
-				{
-					Log.d("Error", "11");
-					if(resln.length() - (eindex+1) > 1)
-					{
-						if(chresln[eindex+1] == '0')
-						{
-							Log.d("Error", "12");
-							String resWind = new BigDecimal(res).toPlainString();
-							numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
-						}
-						else
-						{
-							Log.d("Error", "13");
-							numWind.append(formatter.format(res));
-						}
-					}
-					else if(resln.length() - (eindex+1) == 1)
-					{
-						Log.d("Error", "14");
-						String resWind = new BigDecimal(res).toPlainString();
-						numWind.append(resWind.substring(0, resWind.lastIndexOf('.') + 10));
-					}
-					else
-					{
-						Log.d("Error", "15");
-						numWind.append("" + res);
-					}
-				}
-				else
-				{
-					Log.d("Error", "16");
-					numWind.append("" + res);
-				}
-			}
+			numWind.setText("");
+			numWind.append("" + res.stripTrailingZeros().toPlainString());
 		}
 		
 		posOp = 0;
@@ -633,21 +608,12 @@ public class Calculator extends Fragment implements OnClickListener
 		numbers.clear();
 		numbers.add(res);
 		operations.clear();
-		res = 0;
 		resEmpty = false;
-		zpz = 1;
-		
-		String sres = numWind.getText().toString();
-		if(sres.lastIndexOf('E') == -1)
-			pmbtn.setEnabled(true);
-		else
-			pmbtn.setEnabled(false);
-		
-		if(numWind.getText().toString().equals("Infinity") || numWind.getText().toString().equals("NaN"))
-			inf = true;
+		zpz = new BigDecimal(1);
+		nonfull = true;
 	}
 	
-	private boolean delLastSign()
+	private void delLastSign()
 	{
 		String line = numWind.getText().toString();
 		lineLength = line.length();
@@ -656,14 +622,8 @@ public class Calculator extends Fragment implements OnClickListener
 			String resLine = line.substring(0, line.length()-1);
 			numWind.setText("");
 			numWind.append(resLine);
-			return false;
 		}
 		else
-		{
 			ac();
-			numbers.clear();
-			operations.clear();
-			return true;
-		}
 	}
 }
