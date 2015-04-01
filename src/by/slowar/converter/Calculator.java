@@ -191,16 +191,31 @@ public class Calculator extends Fragment implements OnClickListener
 	
 	private void number(BigDecimal number)
 	{
+		if(!numbers.isEmpty() && numbers.get(numbers.size()-1).scale() > 0 && nonfull)
+		{
+			dotPressed = true;
+		}
 		if(inf)
 			ac();
 		if(nonfull)	//changing in collection
+			
 		{
 			if(dotPressed)
 			{
-				numWind.append(number.toString());
-				for(int i = 0; i <= numbers.get(numbers.size()-1).scale(); i++)
-					number = number.divide(new BigDecimal(10), 9, RoundingMode.UP);
-				numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).add(number));
+				if(numbers.get(numbers.size()-1).compareTo(new BigDecimal(0)) == -1)
+				{
+					numWind.append(number.toString());
+					for(int i = 0; i <= numbers.get(numbers.size()-1).scale(); i++)
+						number = number.divide(new BigDecimal(10), 9, RoundingMode.UP);
+					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).subtract(number));
+				}
+				else
+				{
+					numWind.append(number.toString());
+					for(int i = 0; i <= numbers.get(numbers.size()-1).scale(); i++)
+						number = number.divide(new BigDecimal(10), 9, RoundingMode.UP);
+					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).add(number));
+				}
 			}
 			else
 			{
@@ -337,7 +352,9 @@ public class Calculator extends Fragment implements OnClickListener
 		else if (!dotPressed && !nonfull)
 		{
 			if(resEmpty)
+			{
 				numbers.add(temp);
+			}
 		}
 		else if(dotPressed && nonfull)
 		{
@@ -347,7 +364,9 @@ public class Calculator extends Fragment implements OnClickListener
 			nonfull = false;
 		}
 		else if(!dotPressed && nonfull)
+		{
 			nonfull = false;
+		}
 		
 		if(negative)
 		{
@@ -358,6 +377,7 @@ public class Calculator extends Fragment implements OnClickListener
 			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).abs());
 		
 		temp = new BigDecimal(0);
+		resEmpty = true;
 	}
 	
 	private void useValues()
@@ -442,8 +462,11 @@ public class Calculator extends Fragment implements OnClickListener
 					nonfull = true;
 				}
 				else
+				{
 					numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).divide(new BigDecimal(10)).setScale(0, RoundingMode.DOWN).stripTrailingZeros());
-				
+					nonfull = true;
+				}
+					
 				if(numbers.get(numbers.size()-1).compareTo(new BigDecimal(0)) == 0)
 				{
 					numbers.remove(numbers.size()-1);
@@ -482,12 +505,10 @@ public class Calculator extends Fragment implements OnClickListener
 			numbers.add(temp);
 		
 		temp = new BigDecimal(0);
-		
 		if(negative)
 		{
 			numbers.set(numbers.size()-1, numbers.get(numbers.size()-1).negate());
 			negadded = false;
-			negative = false;
 		}
 		
 		if(dotPressed && nonfull)

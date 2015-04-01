@@ -115,6 +115,13 @@
                 android:layout_marginLeft="7dp"
                 android:background="@drawable/refresh" />
 
+            <Button
+                android:id="@+id/btnclr"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginLeft="7dp"
+                android:background="@drawable/clr" />
+
         </LinearLayout>
 
         <LinearLayout

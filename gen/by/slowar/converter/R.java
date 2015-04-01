@@ -1076,9 +1076,10 @@ containing a value of this type.
         public static final int abc_textfield_searchview_holo_light=0x7f020054;
         public static final int abc_textfield_searchview_right_holo_dark=0x7f020055;
         public static final int abc_textfield_searchview_right_holo_light=0x7f020056;
-        public static final int ic_launcher=0x7f020057;
-        public static final int refresh=0x7f020058;
-        public static final int swap=0x7f020059;
+        public static final int clr=0x7f020057;
+        public static final int ic_launcher=0x7f020058;
+        public static final int refresh=0x7f020059;
+        public static final int swap=0x7f02005a;
     }
     public static final class id {
         public static final int ac=0x7f09003f;
@@ -1097,9 +1098,10 @@ containing a value of this type.
         public static final int always=0x7f09000f;
         public static final int beginning=0x7f090016;
         public static final int btnRefresh=0x7f09005a;
+        public static final int btnclr=0x7f09005b;
         public static final int checkbox=0x7f09002d;
         public static final int collapseActionView=0x7f090010;
-        public static final int convertbtn=0x7f09005d;
+        public static final int convertbtn=0x7f09005e;
         public static final int default_activity_button=0x7f090028;
         public static final int dialog=0x7f090014;
         public static final int disableHome=0x7f090009;
@@ -1132,8 +1134,8 @@ containing a value of this type.
         public static final int normal=0x7f090007;
         public static final int numWind=0x7f09003d;
         public static final int one=0x7f09004b;
-        public static final int pager=0x7f09005e;
-        public static final int pagerTabStrip=0x7f09005f;
+        public static final int pager=0x7f09005f;
+        public static final int pagerTabStrip=0x7f090060;
         public static final int perbtn=0x7f090041;
         public static final int plus=0x7f09004e;
         public static final int pmbtn=0x7f090040;
@@ -1165,12 +1167,12 @@ containing a value of this type.
         public static final int swap2=0x7f090055;
         public static final int tabMode=0x7f090008;
         public static final int textView1=0x7f090058;
-        public static final int textView2=0x7f09005b;
+        public static final int textView2=0x7f09005c;
         public static final int then=0x7f090051;
         public static final int three=0x7f09004d;
         public static final int title=0x7f09002b;
         public static final int top_action_bar=0x7f090020;
-        public static final int tvupd=0x7f09005c;
+        public static final int tvupd=0x7f09005d;
         public static final int two=0x7f09004c;
         public static final int up=0x7f090021;
         public static final int useLogo=0x7f09000e;
@@ -1276,6 +1278,7 @@ containing a value of this type.
         public static final int abc_shareactionprovider_share_with_application=0x7f0a000b;
         public static final int action_settings=0x7f0a000e;
         public static final int app_name=0x7f0a000d;
+        public static final int cantconv=0x7f0a0021;
         public static final int chooseOp=0x7f0a0020;
         public static final int convert=0x7f0a0012;
         public static final int currency=0x7f0a000f;
@@ -1291,7 +1294,7 @@ containing a value of this type.
         public static final int restart=0x7f0a001c;
         public static final int save=0x7f0a001b;
         public static final int serror=0x7f0a0010;
-        public static final int settings=0x7f0a0021;
+        public static final int settings=0x7f0a0022;
         public static final int swap=0x7f0a0013;
         public static final int update=0x7f0a0011;
         public static final int usevalues=0x7f0a0015;

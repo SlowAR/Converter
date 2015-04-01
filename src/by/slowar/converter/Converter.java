@@ -10,7 +10,6 @@ import android.content.SharedPreferences.Editor;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,7 +28,7 @@ public class Converter extends Fragment implements OnClickListener
 	TextView jsonRes, tvupd;
 	Button convertbtn;
 	Button swap1, swap2;
-	Button btnRefresh;
+	Button btnRefresh, btnclr;
 	EditText etone, ettwo;
 	Spinner spin1, spin2;
 	Currencies currencies;
@@ -65,6 +64,7 @@ public class Converter extends Fragment implements OnClickListener
         swap1 = (Button) view.findViewById(R.id.swap1);
         swap2 = (Button) view.findViewById(R.id.swap2);
         btnRefresh = (Button) view.findViewById(R.id.btnRefresh);
+        btnclr = (Button) view.findViewById(R.id.btnclr);
         etone = (EditText) view.findViewById(R.id.etone);
         ettwo = (EditText) view.findViewById(R.id.ettwo);
         spin1 = (Spinner) view.findViewById(R.id.spinner1);
@@ -74,19 +74,9 @@ public class Converter extends Fragment implements OnClickListener
         swap1.setOnClickListener(this);
         swap2.setOnClickListener(this);
         btnRefresh.setOnClickListener(this);
+        btnclr.setOnClickListener(this);
         
         currencies = new Currencies(this, prefs);
-        
-//        if(chnet.connet(cm))
-//        	if(!listGeted)
-//        		currencies.getList();
-//		else
-//		{
-//			if(!listGeted)
-//        		loadingDataOffline();
-//        	if(!spin1.getSelectedItem().toString().isEmpty() && !spin2.getSelectedItem().toString().isEmpty())
-//        		chnet.dateUp(false, prefs, spin1.getSelectedItem().toString().substring(0, 3) + spin2.getSelectedItem().toString().substring(0, 3));
-//		}
         
         refresh();
         
@@ -190,7 +180,6 @@ public class Converter extends Fragment implements OnClickListener
 				firstValue = new BigDecimal(etone.getText().toString());
 				secondValue = new BigDecimal(kurs);
 				firstValue = firstValue.multiply(secondValue);
-				Log.d("Error", "1");
 				if(firstValue.compareTo(firstValue.setScale(0, RoundingMode.UP)) == 0)
 					ettwo.setText("" + firstValue.setScale(0, RoundingMode.UP));
 				else
@@ -198,7 +187,6 @@ public class Converter extends Fragment implements OnClickListener
 			}
 			catch(Exception e)
 			{
-				Log.d("Error", "" + e);
 				Toast.makeText(getActivity(), R.string.errorvalues, Toast.LENGTH_LONG).show();
 			}
 			break;
@@ -221,6 +209,11 @@ public class Converter extends Fragment implements OnClickListener
 			
 		case R.id.btnRefresh:
 			refresh();
+			break;
+			
+		case R.id.btnclr:
+			etone.setText("");
+			ettwo.setText("");
 			break;
 		}
 	}

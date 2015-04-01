@@ -21,6 +21,7 @@
     <string name="loadingMsg">Loading data</string>
     <string name="noInternet">Check Your Internet connection</string>
     <string name="chooseOp">Choose operation</string>
+    <string name="cantconv">Could not convert</string>
     
     <array name="data">
        <item>Converter</item>

@@ -16,6 +16,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.AsyncTask;
+import android.view.View;
 import android.widget.ArrayAdapter;
 
 public class Currencies extends Activity
@@ -84,13 +85,25 @@ public class Currencies extends Activity
         	try
         	{
         		String currency = "";
-            	for(int i = 0; i < result.length(); i++)
-            	{
-            		if(Character.isDigit(result.charAt(i)) || result.charAt(i) == '.')
+        		if(result.equals(""))
+        		{
+        			converter.jsonRes.setText(R.string.cantconv);
+        			converter.convertbtn.setEnabled(false);
+        			converter.btnclr.setVisibility(View.INVISIBLE);
+        			return;
+        		}
+        		else
+        		{
+        			converter.convertbtn.setEnabled(true);
+        			converter.btnclr.setVisibility(View.VISIBLE);
+                	for(int i = 0; i < result.length(); i++)
                 	{
-                		currency = currency + result.charAt(i);
+                		if(Character.isDigit(result.charAt(i)) || result.charAt(i) == '.')
+                    	{
+                    		currency = currency + result.charAt(i);
+                    	}
                 	}
-            	}
+        		}
             	
             	if(currency == "")
             	{
